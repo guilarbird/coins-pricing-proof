@@ -85,14 +85,14 @@ export default function Home() {
     );
   }
 
-  const prices = snapshot.price_holders;
-  const comp = snapshot.comparison;
+  const prices = snapshot?.price_holders || {};
+  const comp = snapshot?.comparison;
   
   // Reorder prices to show GBPUSD, USDBRL, GBPBRL
   const orderedPrices = {
-    'GBPUSD': prices.GBPUSD,
-    'USDBRL': prices.USDBRL,
-    'GBPBRL': prices.GBPBRL
+    'GBPUSD': prices?.GBPUSD,
+    'USDBRL': prices?.USDBRL,
+    'GBPBRL': prices?.GBPBRL
   };
 
   if (!comp) {
@@ -215,7 +215,7 @@ export default function Home() {
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {Object.entries(orderedPrices).map(([pair, data]: any) => (
+              {Object.entries(orderedPrices).filter(([_, data]) => data).map(([pair, data]: any) => (
                 <Card key={pair} className="bg-card border-border">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg font-mono">
@@ -224,10 +224,10 @@ export default function Home() {
                     {pair === 'GBPBRL' && '🇬🇧 £ → 🇧🇷 R$'}
                   </CardTitle>
                     <CardDescription className="text-xs">
-                      {data.source === 'valorpro' && '🏦 ValorPro (Official BRL Rate)'}
-                      {data.source === 'derived' && '🔗 Derived (£ × $ × R$)'}
-                      {data.source === 'simulated' && '📈 Market Reference'}
-                      {' • '}{data.staleness_seconds}s ago
+                      {data?.source === 'valorpro' && '🏦 ValorPro (Official BRL Rate)'}
+                      {data?.source === 'derived' && '🔗 Derived (£ × $ × R$)'}
+                      {data?.source === 'simulated' && '📈 Market Reference'}
+                      {' • '}{data?.staleness_seconds || 0}s ago
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
