@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Copy, Check, ArrowDown } from "lucide-react";
+import { Copy, Check, ArrowDown, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,19 +20,30 @@ export default function Home() {
   const [snapshot, setSnapshot] = useState<SnapshotData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+
+  const loadSnapshot = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/snapshot.json");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setSnapshot(data);
+      setLastRefresh(new Date());
+      setError(null);
+      toast.success("Data refreshed");
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Error loading data";
+      setError(errorMsg);
+      console.error("Failed to load snapshot:", err);
+      toast.error("Failed to refresh");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadSnapshot = async () => {
-      try {
-        const res = await fetch("/snapshot.json");
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setSnapshot(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error loading data");
-        console.error("Failed to load snapshot:", err);
-      }
-    };
     loadSnapshot();
   }, []);
 
@@ -43,12 +54,12 @@ export default function Home() {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  if (error) {
+  if (error && !snapshot) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <p className="text-red-500 mb-4">Error: {error}</p>
-          <Button onClick={() => window.location.reload()}>Reload</Button>
+          <Button onClick={loadSnapshot}>Retry</Button>
         </div>
       </div>
     );
@@ -80,6 +91,12 @@ export default function Home() {
   const coins = comp.coins || {};
   const delta = comp.delta || {};
 
+  // TransferWise reference rates (GBP → BRL as of Jan 2026)
+  const transferwiseRate = 6.58; // Approximate rate
+  const transferwiseFee = 0.70; // 0.70% fee
+  const transferwiseAmount = (comp.amount_gbp || 0) * transferwiseRate * (1 - transferwiseFee / 100);
+  const transferwiseCost = ((comp.reference_brl || 0) - transferwiseAmount) / (comp.reference_brl || 1) * 10000; // in bps
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -92,8 +109,27 @@ export default function Home() {
               <p className="text-xs text-muted-foreground">Understanding GBP → BRL Transfers</p>
             </div>
           </div>
-          <div className="text-xs text-muted-foreground">
-            {comp.timestamp ? new Date(comp.timestamp).toLocaleString("en-GB") : ""}
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="text-xs text-muted-foreground">
+                {comp.timestamp ? new Date(comp.timestamp).toLocaleString("en-GB") : ""}
+              </div>
+              {lastRefresh && (
+                <div className="text-xs text-muted-foreground">
+                  Refreshed {Math.round((Date.now() - lastRefresh.getTime()) / 1000)}s ago
+                </div>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadSnapshot}
+              disabled={loading}
+              className="gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
           </div>
         </div>
       </header>
@@ -477,13 +513,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* COMPARISON */}
+        {/* COMPARISON - Including TransferWise */}
         <section className="space-y-8">
           <div className="space-y-4">
             <h2 className="text-3xl font-bold text-foreground">Comparison</h2>
+            <p className="text-muted-foreground">Including industry reference (TransferWise)</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="bg-card border-border">
               <CardHeader>
                 <CardTitle className="text-lg">Bank structure</CardTitle>
@@ -504,9 +541,30 @@ export default function Home() {
               </CardContent>
             </Card>
 
+            <Card className="bg-card border-border border-amber-500/50">
+              <CardHeader>
+                <CardTitle className="text-lg text-amber-600">TransferWise</CardTitle>
+                <CardDescription className="text-xs">Industry reference</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">You receive</p>
+                  <p className="text-3xl font-bold text-amber-600">
+                    R${transferwiseAmount.toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                  </p>
+                </div>
+                <div className="border-t border-border pt-4">
+                  <p className="text-sm text-muted-foreground">Cost</p>
+                  <p className="text-2xl font-bold text-amber-600">
+                    {transferwiseCost.toFixed(0)} bps
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="bg-card border-border border-primary/50">
               <CardHeader>
-                <CardTitle className="text-lg text-primary">Market-based structure</CardTitle>
+                <CardTitle className="text-lg text-primary">Market-based (Coins)</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -527,7 +585,7 @@ export default function Home() {
 
           <Card className="bg-primary/10 border-primary/50">
             <CardHeader>
-              <CardTitle className="text-primary">Net difference</CardTitle>
+              <CardTitle className="text-primary">Net difference vs Bank</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
