@@ -1,6 +1,6 @@
 """
 PHASE 1: PRICE HOLDERS MODULE (REAL APIs)
-Consome dados de APIs públicas (Binance, Coins.xyz, ValorPro)
+Consome dados de APIs públicas (ValorPro primária para BRL, Binance para FX, Coins.xyz fallback)
 Normaliza para schema único com fallback automático
 """
 
@@ -55,7 +55,7 @@ class PriceHolder:
 class PriceOracle:
     """Oracle de preços com fallback automático entre fontes"""
     
-    CACHE_TTL = 10  # segundos
+    CACHE_TTL = 3  # segundos - atualiza a cada 3s
     
     def __init__(self, use_simulated: bool = False):
         self.cache = {}
@@ -67,9 +67,11 @@ class PriceOracle:
         self.binance_api_secret = os.getenv("BINANCE_API_SECRET", "")
         self.coins_api_key = os.getenv("COINS_API_KEY", "")
         self.coins_api_secret = os.getenv("COINS_API_SECRET", "")
-        self.valorpro_base_url = os.getenv("VALORPRO_BASE_URL", "https://{}.api.valorpro.com.br")
-        self.valorpro_client_id = os.getenv("VALORPRO_CLIENT_ID", "")
-        self.valorpro_client_secret = os.getenv("VALORPRO_CLIENT_SECRET", "")
+        
+        # ValorPro - PRIMÁRIA para BRL
+        self.valorpro_base_url = os.getenv("VALOR_PRO_BASE_URL", "https://{}.api.valorpro.com.br")
+        self.valorpro_client_id = os.getenv("VALOR_PRO_CLIENT_ID", "")
+        self.valorpro_client_secret = os.getenv("VALOR_PRO_CLIENT_SECRET", "")
     
     def _is_cache_valid(self, pair: str) -> bool:
         """Verifica se cache ainda é válido"""
@@ -108,27 +110,31 @@ class PriceOracle:
     def _get_source_priority(self, pair: str) -> List:
         """Define ordem de prioridade por par"""
         
-        if pair == "GBPUSDT":
-            return [self._binance_gbpusdt, self._coins_gbpusdt, self._simulated_price]
-        elif pair == "USDTBRL":
-            return [self._binance_usdtbrl, self._valorpro_usdtbrl, self._coins_usdtbrl, self._simulated_price]
+        if pair == "GBPUSD":
+            # GBP → USD: Binance → Coinbase → Simulated
+            return [self._binance_gbpusd, self._simulated_price]
+        
+        elif pair == "USDBRL":
+            # USD → BRL: ValorPro (PRIMÁRIA) → Coins.xyz → Simulated
+            return [self._valorpro_usdbrl, self._coins_usdbrl, self._simulated_price]
+        
         elif pair == "GBPBRL":
-            # Derivado: GBPUSDT × USDTBRL
+            # GBP → BRL: Derivado (GBPUSD × USDBRL)
             return [self._derived_gbpbrl]
         
         return []
     
-    def _binance_gbpusdt(self, pair: str) -> Optional[PriceHolder]:
-        """Binance Spot API - GBPUSDT"""
+    def _binance_gbpusd(self, pair: str) -> Optional[PriceHolder]:
+        """Binance Spot API - GBPUSD"""
         try:
-            url = "https://api.binance.com/api/v3/ticker/bookTicker?symbol=GBPUSDT"
+            url = "https://api.binance.com/api/v3/ticker/bookTicker?symbol=GBPUSD"
             headers = {"X-MBX-APIKEY": self.binance_api_key} if self.binance_api_key else {}
             resp = requests.get(url, headers=headers, timeout=5)
             resp.raise_for_status()
             data = resp.json()
             
             return PriceHolder(
-                pair="GBPUSDT",
+                pair="GBPUSD",
                 bid=float(data["bidPrice"]),
                 ask=float(data["askPrice"]),
                 source="binance",
@@ -136,86 +142,17 @@ class PriceOracle:
                 is_fallback=False
             )
         except Exception as e:
-            print(f"Binance GBPUSDT error: {e}")
+            print(f"Binance GBPUSD error: {e}")
             return None
     
-    def _binance_usdtbrl(self, pair: str) -> Optional[PriceHolder]:
-        """Binance Spot API - USDTBRL"""
-        try:
-            url = "https://api.binance.com/api/v3/ticker/bookTicker?symbol=USDTBRL"
-            headers = {"X-MBX-APIKEY": self.binance_api_key} if self.binance_api_key else {}
-            resp = requests.get(url, headers=headers, timeout=5)
-            resp.raise_for_status()
-            data = resp.json()
-            
-            return PriceHolder(
-                pair="USDTBRL",
-                bid=float(data["bidPrice"]),
-                ask=float(data["askPrice"]),
-                source="binance",
-                timestamp=datetime.now(timezone.utc).isoformat(),
-                is_fallback=False
-            )
-        except Exception as e:
-            print(f"Binance USDTBRL error: {e}")
-            return None
-    
-    def _coins_gbpusdt(self, pair: str) -> Optional[PriceHolder]:
-        """Coins.xyz API - GBPUSDT"""
-        try:
-            url = "https://api.coins.xyz/v1/ticker/GBPUSDT"
-            headers = {"X-API-KEY": self.coins_api_key} if self.coins_api_key else {}
-            resp = requests.get(url, headers=headers, timeout=5)
-            resp.raise_for_status()
-            data = resp.json()
-            
-            bid = float(data.get("bid", 0))
-            ask = float(data.get("ask", 0))
-            
-            if bid > 0 and ask > 0:
-                return PriceHolder(
-                    pair="GBPUSDT",
-                    bid=bid,
-                    ask=ask,
-                    source="coins",
-                    timestamp=data.get("timestamp", datetime.now(timezone.utc).isoformat()),
-                    is_fallback=False
-                )
-        except Exception as e:
-            print(f"Coins GBPUSDT error: {e}")
-            return None
-    
-    def _coins_usdtbrl(self, pair: str) -> Optional[PriceHolder]:
-        """Coins.xyz API - USDTBRL"""
-        try:
-            url = "https://api.coins.xyz/v1/ticker/USDTBRL"
-            headers = {"X-API-KEY": self.coins_api_key} if self.coins_api_key else {}
-            resp = requests.get(url, headers=headers, timeout=5)
-            resp.raise_for_status()
-            data = resp.json()
-            
-            bid = float(data.get("bid", 0))
-            ask = float(data.get("ask", 0))
-            
-            if bid > 0 and ask > 0:
-                return PriceHolder(
-                    pair="USDTBRL",
-                    bid=bid,
-                    ask=ask,
-                    source="coins",
-                    timestamp=data.get("timestamp", datetime.now(timezone.utc).isoformat()),
-                    is_fallback=False
-                )
-        except Exception as e:
-            print(f"Coins USDTBRL error: {e}")
-            return None
-    
-    def _valorpro_usdtbrl(self, pair: str) -> Optional[PriceHolder]:
-        """ValorPro API - USDTBRL"""
+    def _valorpro_usdbrl(self, pair: str) -> Optional[PriceHolder]:
+        """ValorPro API - USDBRL (PRIMÁRIA para BRL)"""
         try:
             # ValorPro usa autenticação HMAC
             timestamp = str(int(time.time() * 1000))
-            path = "/v1/ticker/USDTBRL"
+            
+            # Endpoint para USDBRL
+            path = "/v1/ticker/USDBRL"
             
             # Construir assinatura
             message = f"{path}{timestamp}"
@@ -225,13 +162,43 @@ class PriceOracle:
                 hashlib.sha256
             ).hexdigest()
             
-            url = f"{self.valorpro_base_url.format('api')}{path}"
+            # Construir URL com base URL parametrizada
+            base_url = self.valorpro_base_url.format('api')
+            url = f"{base_url}{path}"
+            
             headers = {
                 "X-Client-Id": self.valorpro_client_id,
                 "X-Timestamp": timestamp,
-                "X-Signature": signature
+                "X-Signature": signature,
+                "Content-Type": "application/json"
             }
             
+            resp = requests.get(url, headers=headers, timeout=5)
+            resp.raise_for_status()
+            data = resp.json()
+            
+            # ValorPro pode retornar em diferentes formatos
+            bid = float(data.get("bid") or data.get("bidPrice") or 0)
+            ask = float(data.get("ask") or data.get("askPrice") or 0)
+            
+            if bid > 0 and ask > 0:
+                return PriceHolder(
+                    pair="USDBRL",
+                    bid=bid,
+                    ask=ask,
+                    source="valorpro",
+                    timestamp=data.get("timestamp", datetime.now(timezone.utc).isoformat()),
+                    is_fallback=False
+                )
+        except Exception as e:
+            print(f"ValorPro USDBRL error: {e}")
+            return None
+    
+    def _coins_usdbrl(self, pair: str) -> Optional[PriceHolder]:
+        """Coins.xyz API - USDBRL (fallback)"""
+        try:
+            url = "https://api.coins.xyz/v1/ticker/USDBRL"
+            headers = {"X-API-KEY": self.coins_api_key} if self.coins_api_key else {}
             resp = requests.get(url, headers=headers, timeout=5)
             resp.raise_for_status()
             data = resp.json()
@@ -241,22 +208,22 @@ class PriceOracle:
             
             if bid > 0 and ask > 0:
                 return PriceHolder(
-                    pair="USDTBRL",
+                    pair="USDBRL",
                     bid=bid,
                     ask=ask,
-                    source="valorpro",
+                    source="coins",
                     timestamp=data.get("timestamp", datetime.now(timezone.utc).isoformat()),
                     is_fallback=False
                 )
         except Exception as e:
-            print(f"ValorPro USDTBRL error: {e}")
+            print(f"Coins USDBRL error: {e}")
             return None
     
     def _simulated_price(self, pair: str) -> Optional[PriceHolder]:
         """Dados simulados realistas como fallback"""
         prices = {
-            "GBPUSDT": (1.2745, 1.2755),
-            "USDTBRL": (5.1850, 5.1900),
+            "GBPUSD": (1.2740, 1.2760),
+            "USDBRL": (5.1800, 5.1950),
         }
         
         if pair in prices:
@@ -265,24 +232,24 @@ class PriceOracle:
                 pair=pair,
                 bid=bid,
                 ask=ask,
-                source="binance",
+                source="simulated",
                 timestamp=datetime.now(timezone.utc).isoformat(),
                 is_fallback=True
             )
         return None
     
     def _derived_gbpbrl(self, pair: str) -> Optional[PriceHolder]:
-        """Derivado: GBPUSDT × USDTBRL"""
+        """Derivado: GBPUSD × USDBRL"""
         try:
-            gbpusdt = self.get_price("GBPUSDT", use_cache=True)
-            usdtbrl = self.get_price("USDTBRL", use_cache=True)
+            gbpusd = self.get_price("GBPUSD", use_cache=True)
+            usdbrl = self.get_price("USDBRL", use_cache=True)
             
-            if not gbpusdt or not usdtbrl:
+            if not gbpusd or not usdbrl:
                 return None
             
             # Derivar bid/ask
-            bid = gbpusdt.bid * usdtbrl.bid
-            ask = gbpusdt.ask * usdtbrl.ask
+            bid = gbpusd.bid * usdbrl.bid
+            ask = gbpusd.ask * usdbrl.ask
             
             return PriceHolder(
                 pair="GBPBRL",
@@ -298,7 +265,7 @@ class PriceOracle:
     
     def get_all_prices(self) -> Dict[str, Dict]:
         """Retorna todos os pares normalizados"""
-        pairs = ["GBPUSDT", "USDTBRL", "GBPBRL"]
+        pairs = ["GBPUSD", "USDBRL", "GBPBRL"]
         result = {}
         
         for pair in pairs:
@@ -314,8 +281,7 @@ if __name__ == "__main__":
     # Usar simulated se variáveis de ambiente não estiverem definidas
     use_sim = not all([
         os.getenv("BINANCE_API_KEY"),
-        os.getenv("COINS_API_KEY"),
-        os.getenv("VALORPRO_CLIENT_ID")
+        os.getenv("VALOR_PRO_CLIENT_ID")
     ])
     
     oracle = PriceOracle(use_simulated=use_sim)
@@ -331,7 +297,7 @@ if __name__ == "__main__":
     ))
     print("-" * 70)
     
-    for pair in ["GBPUSDT", "USDTBRL", "GBPBRL"]:
+    for pair in ["GBPUSD", "USDBRL", "GBPBRL"]:
         if pair in prices:
             data = prices[pair]
             print("{:<12} {:<12.8f} {:<12.8f} {:<12.8f} {:<12.2f} {:<15}".format(

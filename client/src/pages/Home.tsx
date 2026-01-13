@@ -87,6 +87,13 @@ export default function Home() {
 
   const prices = snapshot.price_holders;
   const comp = snapshot.comparison;
+  
+  // Reorder prices to show GBPUSD, USDBRL, GBPBRL
+  const orderedPrices = {
+    'GBPUSD': prices.GBPUSD,
+    'USDBRL': prices.USDBRL,
+    'GBPBRL': prices.GBPBRL
+  };
 
   if (!comp) {
     return (
@@ -209,12 +216,12 @@ export default function Home() {
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {Object.entries(prices).map(([pair, data]: any) => (
+              {Object.entries(orderedPrices).map(([pair, data]: any) => (
                 <Card key={pair} className="bg-card border-border">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg font-mono">{pair}</CardTitle>
                     <CardDescription className="text-xs">
-                      Source: {data.source} • {data.staleness_seconds}s ago
+                      Source: {data.source === 'valorpro' ? 'ValorPro (BRL Reference)' : data.source === 'derived' ? 'Derived (GBPUSD × USDBRL)' : 'Simulated'} • {data.staleness_seconds}s ago
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
