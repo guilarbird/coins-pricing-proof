@@ -43,8 +43,8 @@
 }
 
 :root {
-  --primary: oklch(0.58 0.25 290);
-  --primary-foreground: oklch(1 0 0);
+  --primary: var(--color-blue-700);
+  --primary-foreground: var(--color-blue-50);
   --sidebar-primary: var(--color-blue-600);
   --sidebar-primary-foreground: var(--color-blue-50);
   --chart-1: var(--color-blue-300);
@@ -79,70 +79,38 @@
 }
 
 .dark {
-  --primary: oklch(0.58 0.25 290); /* Roxo vibrante #6F3BFF */
-  --primary-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.58 0.25 290);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --background: oklch(0.04 0 0); /* #0A0A0B - Preto profundo premium */
-  --foreground: oklch(0.90 0 0); /* #E6E6E6 - Títulos */
-  --card: oklch(0.07 0 0); /* #111 - Cards levemente mais claros */
-  --card-foreground: oklch(0.90 0 0);
-  --popover: oklch(0.07 0 0);
-  --popover-foreground: oklch(0.90 0 0);
-  --secondary: oklch(0.10 0 0);
-  --secondary-foreground: oklch(0.78 0 0); /* #C7C7C7 - Texto */
-  --muted: oklch(0.10 0 0);
-  --muted-foreground: oklch(0.63 0 0); /* #A1A1A1 - Subtítulos */
-  --accent: oklch(0.58 0.25 290); /* Roxo de destaque */
-  --accent-foreground: oklch(1 0 0);
+  --primary: var(--color-blue-700);
+  --primary-foreground: var(--color-blue-50);
+  --sidebar-primary: var(--color-blue-500);
+  --sidebar-primary-foreground: var(--color-blue-50);
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.85 0.005 65);
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.85 0.005 65);
+  --popover: oklch(0.21 0.006 285.885);
+  --popover-foreground: oklch(0.85 0.005 65);
+  --secondary: oklch(0.24 0.006 286.033);
+  --secondary-foreground: oklch(0.7 0.005 65);
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+  --accent: oklch(0.274 0.006 286.033);
+  --accent-foreground:  oklch(0.92 0.005 65);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.10 0 0); /* #1A1A1A - Bordas sutis */
-  --input: oklch(0.10 0 0);
-  --ring: oklch(0.58 0.25 290); /* Roxo para focus */
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.488 0.243 264.376);
   --chart-1: var(--color-blue-300);
   --chart-2: var(--color-blue-500);
   --chart-3: var(--color-blue-600);
   --chart-4: var(--color-blue-700);
   --chart-5: var(--color-blue-800);
-  --sidebar: oklch(0.07 0 0);
-  --sidebar-foreground: oklch(0.90 0 0);
-  --sidebar-accent: oklch(0.10 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.10 0 0);
-  --sidebar-ring: oklch(0.58 0.25 290);
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-@keyframes logoGlow {
-  0%, 100% { 
-    filter: drop-shadow(0 0 4px rgba(140, 82, 255, 0.3));
-    transform: scale(1);
-  }
-  50% { 
-    filter: drop-shadow(0 0 8px rgba(140, 82, 255, 0.5));
-    transform: scale(1.03);
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar-foreground: oklch(0.85 0.005 65);
+  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground:  oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.488 0.243 264.376);
 }
 
 @layer base {
@@ -166,11 +134,24 @@
 }
 
 @layer components {
+  /**
+   * Custom container utility that centers content and adds responsive padding.
+   *
+   * This overrides Tailwind's default container behavior to:
+   * - Auto-center content (mx-auto)
+   * - Add responsive horizontal padding
+   * - Set max-width for large screens
+   *
+   * Usage: <div className="container">...</div>
+   *
+   * For custom widths, use max-w-* utilities directly:
+   * <div className="max-w-6xl mx-auto px-4">...</div>
+   */
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem;
+    padding-left: 1rem; /* 16px - mobile padding */
     padding-right: 1rem;
   }
 
@@ -181,25 +162,16 @@
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem;
+      padding-left: 1.5rem; /* 24px - tablet padding */
       padding-right: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem;
+      padding-left: 2rem; /* 32px - desktop padding */
       padding-right: 2rem;
-      max-width: 1280px;
+      max-width: 1280px; /* Standard content width */
     }
-  }
-
-  /* Cognitive Design: Animations for discovery */
-  .animate-discover {
-    animation: slideInFromBottom 0.6s ease-out forwards;
-  }
-
-  .animate-fade {
-    animation: fadeIn 0.4s ease-out forwards;
   }
 }
