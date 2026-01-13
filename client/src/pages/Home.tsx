@@ -235,7 +235,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {snapshot.prices.GBPUSD && (
+            {snapshot?.prices?.GBPUSD && (
               <Card className="p-4 border border-border">
                 <div className="mb-3">
                   <p className="text-xs text-muted-foreground mb-1">From Binance</p>
@@ -249,7 +249,7 @@ export default function Home() {
               </Card>
             )}
 
-            {snapshot.prices.USDBRL && (
+            {snapshot?.prices?.USDBRL && (
               <Card className="p-4 border border-border">
                 <div className="mb-3">
                   <p className="text-xs text-muted-foreground mb-1">From ValorPro</p>
@@ -263,17 +263,19 @@ export default function Home() {
               </Card>
             )}
 
-            <Card className="p-4 border border-border">
-              <div className="mb-3">
-                <p className="text-xs text-muted-foreground mb-1">Calculated from above</p>
-                <p className="font-semibold text-lg">🇬🇧 GBP / 🇧🇷 BRL</p>
-              </div>
-              <p className="text-3xl font-bold mb-3">{gbpbrl.toFixed(4)}</p>
-              <div className="text-xs text-muted-foreground space-y-1">
-                <p>Binance × ValorPro</p>
-                <p>Market reference (no markup)</p>
-              </div>
-            </Card>
+            {gbpbrl && (
+              <Card className="p-4 border border-border">
+                <div className="mb-3">
+                  <p className="text-xs text-muted-foreground mb-1">Calculated from above</p>
+                  <p className="font-semibold text-lg">🇬🇧 GBP / 🇧🇷 BRL</p>
+                </div>
+                <p className="text-3xl font-bold mb-3">{gbpbrl.toFixed(4)}</p>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>Binance × ValorPro</p>
+                  <p>Market reference (no markup)</p>
+                </div>
+              </Card>
+            )}
           </div>
         </div>
 
