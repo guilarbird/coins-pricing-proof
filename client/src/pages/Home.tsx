@@ -121,28 +121,6 @@ export default function Home() {
               <p className="text-xs text-muted-foreground">Understanding GBP → BRL Transfers</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-xs text-muted-foreground">
-                {comp.timestamp ? new Date(comp.timestamp).toLocaleString("en-GB") : ""}
-              </div>
-              {lastRefresh && (
-                <div className="text-xs text-muted-foreground">
-                  Refreshed {Math.round((Date.now() - lastRefresh.getTime()) / 1000)}s ago
-                </div>
-              )}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadSnapshot}
-              disabled={loading}
-              className="gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
-          </div>
         </div>
       </header>
 
@@ -217,7 +195,19 @@ export default function Home() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-foreground mb-4">Live market prices right now</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground">Live market prices right now</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadSnapshot}
+                disabled={loading}
+                className="gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Object.entries(prices).map(([pair, data]: any) => (
                 <Card key={pair} className="bg-card border-border">
