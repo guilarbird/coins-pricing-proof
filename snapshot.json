@@ -1,4 +1,14 @@
 {
+  "version": "1.0",
+  "generated_at": "2026-01-13T23:19:08.604668+00:00",
+  "client": "Ed",
+  "inputs": {
+    "amount_gbp": 100000,
+    "bank_fx_markup_bps": 80,
+    "bank_fee_pct": 0.8,
+    "pricing_mode": "indicative",
+    "network_fee_usdt": 5.0
+  },
   "price_holders": {
     "GBPUSD": {
       "pair": "GBPUSD",
@@ -6,7 +16,7 @@
       "ask": 1.276,
       "mid": 1.275,
       "source": "simulated",
-      "timestamp": "2026-01-13T21:37:11.722408+00:00",
+      "timestamp": "2026-01-13T23:19:08.604547+00:00",
       "staleness_seconds": 0,
       "spread_bps": 15.69,
       "is_fallback": true
@@ -16,61 +26,71 @@
       "bid": 5.18,
       "ask": 5.195,
       "mid": 5.1875,
-      "source": "valorpro",
-      "timestamp": "2026-01-13T21:37:11.722457+00:00",
+      "source": "simulated",
+      "timestamp": "2026-01-13T23:19:08.002518+00:00",
       "staleness_seconds": 0,
-      "spread_bps": 29.04,
+      "spread_bps": 28.92,
       "is_fallback": true
     },
     "GBPBRL": {
       "pair": "GBPBRL",
-      "bid": 6.6127396874999995,
-      "ask": 6.615385312499999,
-      "mid": 6.614062499999999,
+      "bid": 6.59932,
+      "ask": 6.62882,
+      "mid": 6.61407,
       "source": "derived",
-      "timestamp": "2026-01-13T21:37:11.722463+00:00",
+      "timestamp": "2026-01-13T23:19:08.002566+00:00",
       "staleness_seconds": 0,
-      "spread_bps": 30.83,
+      "spread_bps": 44.6,
       "is_fallback": false
     }
   },
   "comparison": {
     "amount_gbp": 100000,
-    "reference_brl": 661406.2499999999,
-    "timestamp": "2026-01-13T21:37:11.722469+00:00",
+    "reference_brl": 661407.0,
+    "timestamp": "2026-01-13T23:19:08.604630+00:00",
     "bank": {
+      "name": "Banco Tradicional",
+      "brl_received": 628086.47941632,
+      "cost_brl": 33320.52058368005,
+      "cost_bps": 503.7824000000008,
+      "time": "1-2 dias \u00fateis",
       "fx_markup_bps": 80,
       "fee_pct": 0.8,
-      "fx_cost_brl": 5291.249999999999,
-      "brl_after_fx": 656114.9999999999,
-      "fee_brl": 5248.919999999999,
-      "brl_received": 650866.0799999998,
-      "cost_bps": 159.36000000000064
+      "iof_pct": 3.5,
+      "breakdown": {
+        "hidden_fx_cost_brl": 5291.256000000052,
+        "explicit_fee_brl": 5248.925952,
+        "iof_cost_brl": 22780.338631680002
+      }
     },
     "coins": {
-      "network_fee_usdt": 5,
-      "network_fee_brl": 25.9375,
+      "name": "Coins.xyz Rail",
       "brl_received": 661380.3124999999,
-      "cost_bps": 0.39215686274509814
-    },
-    "transferwise": {
-      "rate": 6.58,
-      "fee_pct": 0.7,
-      "brl_received": 653394.0,
-      "cost_bps": 121.13961729269847
+      "cost_brl": 26.687500000116415,
+      "cost_bps": 0.4034958807529466,
+      "time": "minutos a horas",
+      "pricing_mode": "indicative",
+      "network_fee_usdt": 5.0,
+      "breakdown": {
+        "gbpusd_slippage_bps": 0.0,
+        "network_fee_brl": 25.9375,
+        "usdbrl_slippage_bps": 0.0
+      }
     },
     "delta": {
-      "brl": 10514.232500000042,
-      "bps": 158.96784313725553
+      "brl": 33293.8330836799,
+      "bps": 503.3789041192473,
+      "savings_pct": 99.9199067135427,
+      "winner": "Coins.xyz"
     }
   },
-  "proof_message": "COINS.XYZ PRICING PROOF\nGenerated: 2026-01-13T21:37:11.722476+00:00\n\nMARKET REFERENCES\nGBP \u2192 USD: 1.27500000\nUSD \u2192 BRL: 5.18750000 (ValorPro)\nGBP \u2192 BRL: 6.61406250\n\nAMOUNT: \u00a3100,000\nMARKET REFERENCE: R$661,406.25\n\nBANK STRUCTURE\nFX Markup: 80 bps\nFee: 0.8%\nTotal Cost: 159.36 bps\nYou Receive: R$650,866.08\n\nMARKET-BASED STRUCTURE (Coins)\nNetwork Cost: 0.39 bps\nYou Receive: R$661,380.31\n\nDELTA\nExtra Money: R$10,514.23\nCost Difference: 158.97 bps",
+  "proof_message": "Snapshot \u00a3100,000 \u2192 Bank: R$628,086.48 | Coins: R$661,380.31 | \u0394: R$33,293.83 (503.38 bps). Timestamp: 2026-01-13T23:19:08.604630+00:00. Sources: B, a, n, c, o,  , T, r, a, d, i, c, i, o, n, a, l,  , v, s,  , C, o, i, n, s, ., x, y, z,  , R, a, i, l",
   "audit_trail": {
     "sources": [
-      "valorpro",
+      "derived",
       "simulated"
     ],
-    "timestamp": "2026-01-13T21:37:11.722526+00:00"
+    "timestamp": "2026-01-13T23:19:08.604630+00:00"
   },
-  "integrity_hash": "ef8bb612e426cba67de9b4a1c957b54438ba3ff162498bc8680c8cf3d522c8e3"
+  "integrity_hash": "6c8c5ced78818d833b12f7f92060a7d8174b4c8bdbe391f72999ada05aa63ab6"
 }

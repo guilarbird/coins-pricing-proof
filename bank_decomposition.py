@@ -17,7 +17,8 @@ class BankCostDecomposition:
     def calculate(self, 
                   amount_gbp: float = 100000,
                   bank_fx_markup_bps: float = 80,
-                  bank_fee_pct: float = 0.80) -> Dict:
+                  bank_fee_pct: float = 0.80,
+                  iof_pct: float = 3.50) -> Dict:
         """
         Calcula custos bancários com decomposição clara
         
@@ -52,15 +53,21 @@ class BankCostDecomposition:
         fee_cost_brl = bank_rate * amount_gbp * (bank_fee_pct / 100)
         fee_cost_bps = (fee_cost_brl / reference_brl * 10_000) if reference_brl > 0 else 0
         
-        # 4. Total recebido pelo banco
-        bank_net_brl = reference_brl - hidden_fx_cost_brl - fee_cost_brl
-        total_cost_bps = hidden_fx_cost_bps + fee_cost_bps
+        # 4. IOF (Imposto sobre Operacoes Financeiras) - 3.5% para remessas
+        subtotal_brl = reference_brl - hidden_fx_cost_brl - fee_cost_brl
+        iof_cost_brl = subtotal_brl * (iof_pct / 100)
+        iof_cost_bps = (iof_cost_brl / reference_brl * 10_000) if reference_brl > 0 else 0
+        
+        # 5. Total recebido pelo banco
+        bank_net_brl = subtotal_brl - iof_cost_brl
+        total_cost_bps = hidden_fx_cost_bps + fee_cost_bps + iof_cost_bps
         
         return {
             "inputs": {
                 "amount_gbp": amount_gbp,
                 "bank_fx_markup_bps": bank_fx_markup_bps,
                 "bank_fee_pct": bank_fee_pct,
+                "iof_pct": iof_pct,
             },
             "reference": {
                 "gbpbrl_mid": gbpbrl_mid,
@@ -79,10 +86,16 @@ class BankCostDecomposition:
                 "fee_cost_brl": fee_cost_brl,
                 "fee_cost_bps": fee_cost_bps,
             },
+            "iof": {
+                "iof_pct": iof_pct,
+                "iof_cost_brl": iof_cost_brl,
+                "iof_cost_bps": iof_cost_bps,
+            },
             "summary": {
                 "bank_net_brl": bank_net_brl,
-                "total_cost_brl": hidden_fx_cost_brl + fee_cost_brl,
+                "total_cost_brl": hidden_fx_cost_brl + fee_cost_brl + iof_cost_brl,
                 "total_cost_bps": total_cost_bps,
+                "iof_cost_brl": iof_cost_brl,
             }
         }
 

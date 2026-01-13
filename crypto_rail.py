@@ -30,39 +30,39 @@ class CryptoRail:
         """
         
         # Obter preços
-        gbpusdt_price = self.oracle.get_price("GBPUSDT")
-        usdtbrl_price = self.oracle.get_price("USDTBRL")
+        gbpusd_price = self.oracle.get_price("GBPUSD")
+        usdbrl_price = self.oracle.get_price("USDBRL")
         gbpbrl_price = self.oracle.get_price("GBPBRL")
         
-        if not all([gbpusdt_price, usdtbrl_price, gbpbrl_price]):
+        if not all([gbpusd_price, usdbrl_price, gbpbrl_price]):
             raise ValueError("Não foi possível obter cotações necessárias")
         
         # Referência
         gbpbrl_mid = gbpbrl_price.mid
         reference_brl = amount_gbp * gbpbrl_mid
         
-        # PASSO 1: GBP → USDT
+        # PASSO 1: GBP → USD
         if pricing_mode == "conservative":
             # Usar ask (pior para comprador)
-            gbpusdt_rate = gbpusdt_price.ask
+            gbpusd_rate = gbpusd_price.ask
         else:
             # Usar mid (indicativo)
-            gbpusdt_rate = gbpusdt_price.mid
+            gbpusd_rate = gbpusd_price.mid
         
-        usdt_received = amount_gbp * gbpusdt_rate
+        usd_received = amount_gbp * gbpusd_rate
         
-        # PASSO 2: Subtrair taxa de rede
-        usdt_after_fee = usdt_received - network_fee_usdt
+        # PASSO 2: Subtrair taxa de rede (em USD)
+        usd_after_fee = usd_received - network_fee_usdt
         
-        # PASSO 3: USDT → BRL
+        # PASSO 3: USD → BRL
         if pricing_mode == "conservative":
             # Usar bid (pior para vendedor)
-            usdtbrl_rate = usdtbrl_price.bid
+            usdbrl_rate = usdbrl_price.bid
         else:
             # Usar mid (indicativo)
-            usdtbrl_rate = usdtbrl_price.mid
+            usdbrl_rate = usdbrl_price.mid
         
-        brl_received = usdt_after_fee * usdtbrl_rate
+        brl_received = usd_after_fee * usdbrl_rate
         
         # Cálculos de custo
         effective_gbpbrl_rate = brl_received / amount_gbp if amount_gbp > 0 else 0
@@ -70,9 +70,9 @@ class CryptoRail:
         cost_bps = (cost_brl / reference_brl * 10_000) if reference_brl > 0 else 0
         
         # Breakdown de custos
-        cost_gbpusdt_bps = ((gbpusdt_price.mid - gbpusdt_rate) / gbpusdt_price.mid * 10_000) if gbpusdt_price.mid > 0 else 0
-        cost_network_brl = network_fee_usdt * usdtbrl_rate
-        cost_usdtbrl_bps = ((usdtbrl_price.mid - usdtbrl_rate) / usdtbrl_price.mid * 10_000) if usdtbrl_price.mid > 0 else 0
+        cost_gbpusd_bps = ((gbpusd_price.mid - gbpusd_rate) / gbpusd_price.mid * 10_000) if gbpusd_price.mid > 0 else 0
+        cost_network_brl = network_fee_usdt * usdbrl_rate
+        cost_usdbrl_bps = ((usdbrl_price.mid - usdbrl_rate) / usdbrl_price.mid * 10_000) if usdbrl_price.mid > 0 else 0
         
         return {
             "inputs": {
@@ -84,25 +84,25 @@ class CryptoRail:
                 "gbpbrl_mid": gbpbrl_mid,
                 "reference_brl": reference_brl,
             },
-            "step_1_gbp_to_usdt": {
-                "rate_used": gbpusdt_rate,
+            "step_1_gbp_to_usd": {
+                "rate_used": gbpusd_rate,
                 "rate_type": "ask" if pricing_mode == "conservative" else "mid",
-                "gbpusdt_mid": gbpusdt_price.mid,
-                "usdt_received": usdt_received,
-                "source": gbpusdt_price.source,
-                "timestamp": gbpusdt_price.timestamp,
+                "gbpusd_mid": gbpusd_price.mid,
+                "usd_received": usd_received,
+                "source": gbpusd_price.source,
+                "timestamp": gbpusd_price.timestamp,
             },
             "step_2_network_fee": {
-                "fee_usdt": network_fee_usdt,
-                "usdt_after_fee": usdt_after_fee,
+                "fee_usd": network_fee_usdt,
+                "usd_after_fee": usd_after_fee,
             },
-            "step_3_usdt_to_brl": {
-                "rate_used": usdtbrl_rate,
+            "step_3_usd_to_brl": {
+                "rate_used": usdbrl_rate,
                 "rate_type": "bid" if pricing_mode == "conservative" else "mid",
-                "usdtbrl_mid": usdtbrl_price.mid,
+                "usdbrl_mid": usdbrl_price.mid,
                 "brl_received": brl_received,
-                "source": usdtbrl_price.source,
-                "timestamp": usdtbrl_price.timestamp,
+                "source": usdbrl_price.source,
+                "timestamp": usdbrl_price.timestamp,
             },
             "summary": {
                 "brl_received": brl_received,
@@ -110,9 +110,9 @@ class CryptoRail:
                 "cost_brl": cost_brl,
                 "cost_bps": cost_bps,
                 "cost_breakdown": {
-                    "gbpusdt_slippage_bps": cost_gbpusdt_bps,
+                    "gbpusd_slippage_bps": cost_gbpusd_bps,
                     "network_fee_brl": cost_network_brl,
-                    "usdtbrl_slippage_bps": cost_usdtbrl_bps,
+                    "usdbrl_slippage_bps": cost_usdbrl_bps,
                 }
             }
         }

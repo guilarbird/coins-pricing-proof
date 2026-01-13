@@ -21,6 +21,7 @@ class Comparator:
                 amount_gbp: float = 100_000,
                 bank_fx_markup_bps: float = 80,
                 bank_fee_pct: float = 0.80,
+                bank_iof_pct: float = 3.50,
                 pricing_mode: str = "indicative",
                 network_fee_usdt: float = 5.0) -> Dict:
         """
@@ -34,7 +35,8 @@ class Comparator:
         bank_result = self.bank.calculate(
             amount_gbp=amount_gbp,
             bank_fx_markup_bps=bank_fx_markup_bps,
-            bank_fee_pct=bank_fee_pct
+            bank_fee_pct=bank_fee_pct,
+            iof_pct=bank_iof_pct
         )
         
         rail_result = self.rail.calculate(
@@ -46,6 +48,7 @@ class Comparator:
         # Extrair valores principais
         bank_net = bank_result['summary']['bank_net_brl']
         bank_cost_bps = bank_result['summary']['total_cost_bps']
+        bank_iof_brl = bank_result['summary'].get('iof_cost_brl', 0)
         
         rail_net = rail_result['summary']['brl_received']
         rail_cost_bps = rail_result['summary']['cost_bps']
@@ -71,9 +74,11 @@ class Comparator:
                 "time": bank_time,
                 "fx_markup_bps": bank_fx_markup_bps,
                 "fee_pct": bank_fee_pct,
+                "iof_pct": bank_iof_pct,
                 "breakdown": {
                     "hidden_fx_cost_brl": bank_result['fx_markup']['hidden_cost_brl'],
                     "explicit_fee_brl": bank_result['explicit_fee']['fee_cost_brl'],
+                    "iof_cost_brl": bank_iof_brl,
                 }
             },
             "coins": {
@@ -85,9 +90,9 @@ class Comparator:
                 "pricing_mode": pricing_mode,
                 "network_fee_usdt": network_fee_usdt,
                 "breakdown": {
-                    "gbpusdt_slippage_bps": rail_result['summary']['cost_breakdown']['gbpusdt_slippage_bps'],
+                    "gbpusd_slippage_bps": rail_result['summary']['cost_breakdown']['gbpusd_slippage_bps'],
                     "network_fee_brl": rail_result['summary']['cost_breakdown']['network_fee_brl'],
-                    "usdtbrl_slippage_bps": rail_result['summary']['cost_breakdown']['usdtbrl_slippage_bps'],
+                    "usdbrl_slippage_bps": rail_result['summary']['cost_breakdown']['usdbrl_slippage_bps'],
                 }
             },
             "delta": {

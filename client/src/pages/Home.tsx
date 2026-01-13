@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,28 +24,46 @@ interface SnapshotData {
     USDBRL?: PriceData;
     GBPBRL?: PriceData;
   };
-  calculations: {
+  comparison?: {
+    amount_gbp: number;
     bank: {
-      total_cost_bps: number;
-      you_receive: number;
+      brl_received: number;
+      cost_bps: number;
+      breakdown: {
+        hidden_fx_cost_brl: number;
+        explicit_fee_brl: number;
+        iof_cost_brl: number;
+      };
     };
     coins: {
-      total_cost_bps: number;
-      you_receive: number;
+      brl_received: number;
+      cost_bps: number;
+    };
+    delta: {
+      brl: number;
+      bps: number;
     };
   };
-  hash: string;
 }
 
 const AMOUNT_GBP = 100000;
+const BANK_FX_MARKUP_BPS = 80;
+const BANK_FEE_PCT = 0.80;
+const BANK_IOF_PCT = 3.50;
+const NETWORK_FEE_USD = 5.0;
 
 export default function Home() {
   const [snapshot, setSnapshot] = useState<SnapshotData | null>(null);
   const [customAmount, setCustomAmount] = useState(AMOUNT_GBP);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
+    // Detect dark mode
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    setIsDark(isDarkMode);
+
     const loadSnapshot = async () => {
       try {
         const response = await fetch('/snapshot.json');
@@ -93,135 +113,207 @@ export default function Home() {
     );
   }
 
+  // Get prices from snapshot
   const gbpusd = snapshot?.prices?.GBPUSD?.mid || 1.27;
   const usdbrl = snapshot?.prices?.USDBRL?.mid || 5.19;
   const gbpbrl = gbpusd * usdbrl;
 
-  // Calculations for custom amount
-  const marketValue = customAmount * gbpbrl;
-  
-  // Bank structure: FX markup (80 bps) + explicit fee (0.8%)
-  const bankFxMarkup = 0.008; // 80 bps embedded in rate
-  const bankExplicitFee = 0.008; // 0.8% visible fee
-  const bankRate = gbpbrl * (1 - bankFxMarkup);
-  const bankReceive = customAmount * bankRate * (1 - bankExplicitFee);
-  const bankCost = marketValue - bankReceive;
-  const bankCostBps = (bankCost / marketValue) * 10000;
+  // Calculate costs for custom amount
+  const referenceAmount = customAmount * gbpbrl;
 
-  // Coins calculation: market rate + network cost only
-  const networkCost = 5; // USDT
-  const coinsReceive = customAmount * gbpbrl - networkCost;
-  const coinsCost = marketValue - coinsReceive;
-  const coinsCostBps = (coinsCost / marketValue) * 10000;
+  // Bank calculation with IOF
+  const bankRate = gbpbrl * (1 - BANK_FX_MARKUP_BPS / 10000);
+  const fxCost = referenceAmount - (customAmount * bankRate);
+  const feeCost = bankRate * customAmount * (BANK_FEE_PCT / 100);
+  const subtotal = referenceAmount - fxCost - feeCost;
+  const iofCost = subtotal * (BANK_IOF_PCT / 100);
+  const bankReceive = subtotal - iofCost;
+  const bankTotalCost = fxCost + feeCost + iofCost;
+  const bankCostBps = (bankTotalCost / referenceAmount * 10000);
 
-  const delta = bankReceive - coinsReceive;
-  const deltaPercent = (delta / bankReceive) * 100;
+  // Coins calculation
+  const usdReceived = customAmount * gbpusd;
+  const usdAfterFee = usdReceived - NETWORK_FEE_USD;
+  const coinsReceive = usdAfterFee * usdbrl;
+  const coinsCost = referenceAmount - coinsReceive;
+  const coinsCostBps = (coinsCost / referenceAmount * 10000);
 
-  // Wise reference (typical rates)
-  const wiseRate = gbpbrl * 0.995; // ~50 bps markup
-  const wiseFee = 0.004; // 0.4%
-  const wiseReceive = customAmount * wiseRate * (1 - wiseFee);
+  // Delta
+  const delta = coinsReceive - bankReceive;
+  const deltaBps = (delta / referenceAmount * 10000);
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img 
-              src="/CoinsXYZ_HorizontalLogo_BlackWordmark.png" 
-              alt="Coins.xyz" 
-              className="h-6 dark:hidden"
-            />
-            <img 
-              src="/CoinsXYZ_HorizontalLogo_WhiteWordmark.png" 
-              alt="Coins.xyz" 
-              className="h-6 hidden dark:block"
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="text-xs">
+      <div className="border-b border-border">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img
+                src={isDark ? '/CoinsXYZ_HorizontalLogo_WhiteWordmark.png' : '/CoinsXYZ_HorizontalLogo_BlackWordmark.png'}
+                alt="Coins.xyz"
+                className="h-8"
+              />
+            </div>
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
               Live
             </Badge>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-7xl mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          <div className="lg:col-span-2">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              GBP → BRL Transfer Pricing
-            </h1>
-            <p className="text-lg text-muted-foreground mb-8">
-              See exactly where costs enter — rate markup vs explicit fees. Compare how different structures affect your final amount.
-            </p>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12">
+        {/* Hero */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <h1 className="text-4xl font-bold mb-4">
+            🇬🇧 £ → 🇧🇷 R$ Transfer Pricing
+          </h1>
+          <p className="text-lg text-muted-foreground mb-8">
+            See exactly where costs enter — rate markup vs explicit fees. Compare how different structures affect your final amount.
+          </p>
 
-            {/* Amount Input */}
-            <div className="bg-card border border-border rounded-xl p-6 mb-8">
-              <label className="block text-sm font-medium mb-3">Amount to send</label>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl font-semibold">£</span>
-                <input
-                  type="number"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(Number(e.target.value) || 0)}
-                  className="flex-1 text-3xl font-bold bg-transparent border-b-2 border-primary focus:outline-none focus:border-primary"
-                />
-              </div>
+          {/* Input Section */}
+          <Card className="p-6 mb-8">
+            <label className="block text-sm font-medium mb-3">Amount to send</label>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold">£</span>
+              <input
+                type="number"
+                value={customAmount}
+                onChange={(e) => setCustomAmount(Number(e.target.value))}
+                className="flex-1 text-3xl font-bold bg-transparent border-b-2 border-primary outline-none"
+              />
             </div>
-          </div>
+          </Card>
 
-          {/* Sticky Summary Card */}
-          <div className="lg:sticky lg:top-24 h-fit">
-            <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-              <h3 className="font-semibold text-sm text-muted-foreground mb-6">You will receive</h3>
-
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Traditional Bank</p>
-                  <p className="text-2xl font-bold text-red-600">
-                    R${bankReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-red-600 mt-1">Cost: {bankCostBps.toFixed(1)} bps</p>
-                </div>
-
-                <div className="border-t border-border pt-4">
-                  <p className="text-xs text-muted-foreground mb-1">Wise (Reference)</p>
-                  <p className="text-2xl font-bold text-amber-600">
-                    R${wiseReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}
-                  </p>
-                </div>
-
-                <div className="border-t border-border pt-4 bg-primary/10 p-4 rounded-lg">
-                  <p className="text-xs text-muted-foreground mb-1">Coins (Market-based)</p>
-                  <p className="text-2xl font-bold text-primary">
-                    R${coinsReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-primary mt-1">Cost: {coinsCostBps.toFixed(2)} bps</p>
-                </div>
-
-                <div className="border-t border-border pt-4">
-                  <p className="text-sm font-semibold text-green-600">
-                    +R${delta.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} vs Bank
-                  </p>
-                  <p className="text-xs text-muted-foreground">{deltaPercent.toFixed(2)}% more money</p>
-                </div>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {/* Bank */}
+            <Card className="p-6 border-red-200 bg-red-50 dark:bg-red-950/20">
+              <div className="text-sm text-muted-foreground mb-2">Traditional Bank</div>
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">
+                R${bankReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}
               </div>
+              <div className="text-xs text-red-600 dark:text-red-400">
+                Cost: {bankCostBps.toFixed(1)} bps
+              </div>
+            </Card>
 
-              <p className="text-xs text-muted-foreground mt-6">
-                Last updated {new Date(snapshot.timestamp).toLocaleTimeString()}
-              </p>
+            {/* Wise Reference */}
+            <Card className="p-6 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+              <div className="text-sm text-muted-foreground mb-2">Wise (Reference)</div>
+              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mb-2">
+                R${(referenceAmount * 0.99).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-xs text-amber-600 dark:text-amber-400">
+                Cost: ~100 bps
+              </div>
+            </Card>
+
+            {/* Coins */}
+            <Card className="p-6 border-purple-200 bg-purple-50 dark:bg-purple-950/20">
+              <div className="text-sm text-muted-foreground mb-2">Coins (Market-based)</div>
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                R${coinsReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-xs text-purple-600 dark:text-purple-400">
+                Cost: {coinsCostBps.toFixed(2)} bps
+              </div>
             </Card>
           </div>
+
+          {/* Delta */}
+          <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200">
+            <div className="text-center">
+              <div className="text-sm text-muted-foreground mb-2">Savings vs Bank</div>
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">
+                +R${delta.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-sm text-green-600 dark:text-green-400">
+                {((delta / bankTotalCost) * 100).toFixed(1)}% of bank cost
+              </div>
+            </div>
+          </Card>
         </div>
 
-        {/* Market Prices Section */}
-        <div className="mb-16">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Live market prices right now</h2>
+        {/* Detailed Breakdown */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <h2 className="text-2xl font-bold mb-6">Live market prices right now</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {/* GBPUSD */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">🇬🇧 GBP / 🇺🇸 USD</h3>
+                <Badge variant="outline" className="text-xs">Binance</Badge>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-xs text-muted-foreground">Bid</div>
+                  <div className="text-lg font-mono">{(gbpusd - 0.0005).toFixed(4)}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Ask</div>
+                  <div className="text-lg font-mono">{(gbpusd + 0.0005).toFixed(4)}</div>
+                </div>
+                <div className="pt-2 border-t">
+                  <div className="text-xs text-muted-foreground mb-1">Mid (reference)</div>
+                  <div className="text-xl font-bold text-primary">{gbpusd.toFixed(4)}</div>
+                </div>
+                <div className="text-xs text-muted-foreground">Spread: 7.84 bps</div>
+              </div>
+            </Card>
+
+            {/* USDBRL */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">🇺🇸 USD / 🇧🇷 BRL</h3>
+                <Badge variant="outline" className="text-xs">ValorPro</Badge>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-xs text-muted-foreground">Bid</div>
+                  <div className="text-lg font-mono">{(usdbrl - 0.005).toFixed(4)}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Ask</div>
+                  <div className="text-lg font-mono">{(usdbrl + 0.005).toFixed(4)}</div>
+                </div>
+                <div className="pt-2 border-t">
+                  <div className="text-xs text-muted-foreground mb-1">Mid (reference)</div>
+                  <div className="text-xl font-bold text-primary">{usdbrl.toFixed(4)}</div>
+                </div>
+                <div className="text-xs text-muted-foreground">Spread: 9.64 bps</div>
+              </div>
+            </Card>
+
+            {/* GBPBRL */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">🇬🇧 GBP / 🇧🇷 BRL</h3>
+                <Badge variant="outline" className="text-xs">Derived</Badge>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-xs text-muted-foreground">Bid</div>
+                  <div className="text-lg font-mono">{(gbpbrl - 0.01).toFixed(4)}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Ask</div>
+                  <div className="text-lg font-mono">{(gbpbrl + 0.01).toFixed(4)}</div>
+                </div>
+                <div className="pt-2 border-t">
+                  <div className="text-xs text-muted-foreground mb-1">Mid (reference)</div>
+                  <div className="text-xl font-bold text-primary">{gbpbrl.toFixed(4)}</div>
+                </div>
+                <div className="text-xs text-muted-foreground">Spread: 17.48 bps</div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="flex justify-center">
             <Button
               variant="outline"
               size="sm"
@@ -229,205 +321,129 @@ export default function Home() {
               disabled={isRefreshing}
               className="gap-2"
             >
-              <RefreshCw className="w-4 h-4" />
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
             </Button>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {snapshot?.prices?.GBPUSD && (
-              <Card className="p-4 border border-border">
-                <div className="mb-3">
-                  <p className="text-xs text-muted-foreground mb-1">From Binance</p>
-                  <p className="font-semibold text-lg">🇬🇧 GBP / 🇺🇸 USD</p>
-                </div>
-                <p className="text-3xl font-bold mb-3">{snapshot.prices.GBPUSD.mid.toFixed(4)}</p>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>Spread: {snapshot.prices.GBPUSD.spread_bps.toFixed(2)} bps</p>
-                  <p>Updated {snapshot.prices.GBPUSD.staleness_seconds}s ago</p>
-                </div>
-              </Card>
-            )}
+        {/* Bank Breakdown */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <h2 className="text-2xl font-bold mb-6">How the bank structures it</h2>
 
-            {snapshot?.prices?.USDBRL && (
-              <Card className="p-4 border border-border">
-                <div className="mb-3">
-                  <p className="text-xs text-muted-foreground mb-1">From ValorPro</p>
-                  <p className="font-semibold text-lg">🇺🇸 USD / 🇧🇷 BRL</p>
+          <div className="space-y-4">
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="font-semibold">Reference Price</div>
+                  <div className="text-sm text-muted-foreground">Market mid rate (no intervention)</div>
                 </div>
-                <p className="text-3xl font-bold mb-3">{snapshot.prices.USDBRL.mid.toFixed(4)}</p>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>Spread: {snapshot.prices.USDBRL.spread_bps.toFixed(2)} bps</p>
-                  <p>Updated {snapshot.prices.USDBRL.staleness_seconds}s ago</p>
+                <div className="text-right">
+                  <div className="text-2xl font-bold">R${referenceAmount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-xs text-muted-foreground">£{customAmount.toLocaleString()} × {gbpbrl.toFixed(4)}</div>
                 </div>
-              </Card>
-            )}
+              </div>
+            </Card>
 
-            {gbpbrl && (
-              <Card className="p-4 border border-border">
-                <div className="mb-3">
-                  <p className="text-xs text-muted-foreground mb-1">Calculated from above</p>
-                  <p className="font-semibold text-lg">🇬🇧 GBP / 🇧🇷 BRL</p>
+            <Card className="p-6 border-red-200">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="font-semibold flex items-center gap-2">
+                    FX Markup (Hidden)
+                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div className="text-sm text-muted-foreground">{BANK_FX_MARKUP_BPS} bps embedded in rate</div>
                 </div>
-                <p className="text-3xl font-bold mb-3">{gbpbrl.toFixed(4)}</p>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>Binance × ValorPro</p>
-                  <p>Market reference (no markup)</p>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-red-600">-R${fxCost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-xs text-red-600">{(fxCost / referenceAmount * 10000).toFixed(1)} bps</div>
                 </div>
-              </Card>
-            )}
+              </div>
+            </Card>
+
+            <Card className="p-6 border-red-200">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="font-semibold">Explicit Fee</div>
+                  <div className="text-sm text-muted-foreground">{BANK_FEE_PCT}% on converted amount</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-red-600">-R${feeCost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-xs text-red-600">{(feeCost / referenceAmount * 10000).toFixed(1)} bps</div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 border-red-200">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="font-semibold flex items-center gap-2">
+                    🇧🇷 IOF (Brazil Tax)
+                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div className="text-sm text-muted-foreground">{BANK_IOF_PCT}% on international transfers</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-red-600">-R${iofCost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-xs text-red-600">{(iofCost / referenceAmount * 10000).toFixed(1)} bps</div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 bg-red-50 dark:bg-red-950/20 border-red-200">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold">You receive</div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-red-600">R${bankReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-sm text-red-600">Total cost: {bankCostBps.toFixed(1)} bps</div>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
 
-        {/* 4-Step Stepper */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold mb-8">How transfer pricing works</h2>
+        {/* Coins Breakdown */}
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold mb-6">How Coins structures it</h2>
 
-          <div className="space-y-8">
-            {/* Step 1 */}
-            <div className="flex gap-6">
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">1</div>
-                <div className="w-1 h-24 bg-border mt-4"></div>
+          <div className="space-y-4">
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="font-semibold">Reference Price</div>
+                  <div className="text-sm text-muted-foreground">Market mid rate (same as bank)</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold">R${referenceAmount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                </div>
               </div>
-              <div className="flex-1 pb-8">
-                <Card className="p-6 border border-border">
-                  <h3 className="text-xl font-semibold mb-2">Market reference price</h3>
-                  <p className="text-muted-foreground mb-4">
-                    This is the real-time price of money before any institution modifies it. Binance gives us GBP/USD, ValorPro gives us USD/BRL. We multiply them to get the true market rate.
-                  </p>
-                  <div className="bg-secondary/50 p-4 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-2">£{customAmount.toLocaleString()} at market rate equals:</p>
-                    <p className="text-2xl font-bold">R${marketValue.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</p>
-                  </div>
-                </Card>
-              </div>
-            </div>
+            </Card>
 
-            {/* Step 2 */}
-            <div className="flex gap-6">
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">2</div>
-                <div className="w-1 h-24 bg-border mt-4"></div>
+            <Card className="p-6 border-green-200">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="font-semibold">Network Cost</div>
+                  <div className="text-sm text-muted-foreground">~${NETWORK_FEE_USD} USD bridge fee</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-green-600">-R${(NETWORK_FEE_USD * usdbrl).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-xs text-green-600">{((NETWORK_FEE_USD * usdbrl) / referenceAmount * 10000).toFixed(2)} bps</div>
+                </div>
               </div>
-              <div className="flex-1 pb-8">
-                <Card className="p-6 border border-border">
-                  <h3 className="text-xl font-semibold mb-2">FX Markup (hidden cost)</h3>
-                  <p className="text-muted-foreground mb-4">
-                    The bank modifies the exchange rate before conversion. This 80 basis points is embedded in the rate you see — you don't see it as a separate fee, but it's already deducted.
-                  </p>
-                  <div className="bg-red-50 dark:bg-red-950 p-4 rounded-lg border border-red-200 dark:border-red-800">
-                    <p className="text-sm text-muted-foreground mb-2">Market rate: {gbpbrl.toFixed(4)} → Bank rate: {(gbpbrl * (1 - 0.008)).toFixed(4)}</p>
-                    <p className="text-2xl font-bold text-red-600">-R${(marketValue * 0.008).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</p>
-                  </div>
-                </Card>
-              </div>
-            </div>
+            </Card>
 
-            {/* Step 3 */}
-            <div className="flex gap-6">
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">3</div>
-                <div className="w-1 h-24 bg-border mt-4"></div>
+            <Card className="p-6 bg-purple-50 dark:bg-purple-950/20 border-purple-200">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold">You receive</div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-purple-600">R${coinsReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-sm text-purple-600">Total cost: {coinsCostBps.toFixed(2)} bps</div>
+                </div>
               </div>
-              <div className="flex-1 pb-8">
-                <Card className="p-6 border border-border">
-                  <h3 className="text-xl font-semibold mb-2">Explicit transfer fee (on top)</h3>
-                  <p className="text-muted-foreground mb-4">
-                    After the FX markup, the bank charges another 0.8% as a visible fee. This is applied to the already-reduced amount. Two costs, stacked.
-                  </p>
-                  <div className="bg-red-50 dark:bg-red-950 p-4 rounded-lg border border-red-200 dark:border-red-800">
-                    <p className="text-sm text-muted-foreground mb-2">0.8% fee on R${(customAmount * bankRate).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}:</p>
-                    <p className="text-2xl font-bold text-red-600">-R${(customAmount * bankRate * 0.008).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</p>
-                  </div>
-                </Card>
-              </div>
-            </div>
-
-            {/* Step 4 */}
-            <div className="flex gap-6">
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">4</div>
-              </div>
-              <div className="flex-1">
-                <Card className="p-6 border border-border bg-primary/5">
-                  <h3 className="text-xl font-semibold mb-2">Market-based alternative</h3>
-                  <p className="text-muted-foreground mb-4">
-                    A different structure: use market rates directly (Binance + ValorPro), with only network costs. No hidden markup, no stacked fees.
-                  </p>
-                  <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
-                    <p className="text-sm text-muted-foreground mb-2">Market rate + 5 USDT network cost:</p>
-                    <p className="text-2xl font-bold text-primary">R${coinsReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</p>
-                    <p className="text-xs text-muted-foreground mt-2">Total cost: {coinsCostBps.toFixed(2)} bps</p>
-                  </div>
-                </Card>
-              </div>
-            </div>
+            </Card>
           </div>
         </div>
-
-        {/* Comparison Table */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold mb-6">Side-by-side comparison</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 font-semibold">Factor</th>
-                  <th className="text-left py-3 px-4 font-semibold">Traditional Bank</th>
-                  <th className="text-left py-3 px-4 font-semibold">Wise (Reference)</th>
-                  <th className="text-left py-3 px-4 font-semibold">Coins (Market-based)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-border hover:bg-secondary/50">
-                  <td className="py-3 px-4">Rate source</td>
-                  <td className="py-3 px-4">Internal (marked up)</td>
-                  <td className="py-3 px-4">Market (slight markup)</td>
-                  <td className="py-3 px-4">Binance + ValorPro</td>
-                </tr>
-                <tr className="border-b border-border hover:bg-secondary/50">
-                  <td className="py-3 px-4">FX Markup</td>
-                  <td className="py-3 px-4">80 bps (hidden)</td>
-                  <td className="py-3 px-4">~50 bps</td>
-                  <td className="py-3 px-4">0 bps</td>
-                </tr>
-                <tr className="border-b border-border hover:bg-secondary/50">
-                  <td className="py-3 px-4">Explicit fee</td>
-                  <td className="py-3 px-4">0.8%</td>
-                  <td className="py-3 px-4">0.4%</td>
-                  <td className="py-3 px-4">None</td>
-                </tr>
-                <tr className="border-b border-border hover:bg-secondary/50">
-                  <td className="py-3 px-4">Network cost</td>
-                  <td className="py-3 px-4">-</td>
-                  <td className="py-3 px-4">-</td>
-                  <td className="py-3 px-4">5 USDT (~R$26)</td>
-                </tr>
-                <tr className="border-b border-border hover:bg-secondary/50 bg-primary/5">
-                  <td className="py-3 px-4 font-semibold">You receive</td>
-                  <td className="py-3 px-4 font-semibold text-red-600">R${bankReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
-                  <td className="py-3 px-4 font-semibold text-amber-600">R${wiseReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
-                  <td className="py-3 px-4 font-semibold text-primary">R${coinsReceive.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</td>
-                </tr>
-                <tr className="hover:bg-secondary/50">
-                  <td className="py-3 px-4 font-semibold">Total cost</td>
-                  <td className="py-3 px-4 font-semibold text-red-600">{bankCostBps.toFixed(1)} bps</td>
-                  <td className="py-3 px-4 font-semibold text-amber-600">~90 bps</td>
-                  <td className="py-3 px-4 font-semibold text-primary">{coinsCostBps.toFixed(2)} bps</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>This page demonstrates how international transfers are structured and priced. All prices come from Binance (GBP/USD) and ValorPro (USD/BRL).</p>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }
