@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2026-01-13T20:40:34.510643+00:00",
+  "generated_at": "2026-01-13T20:54:25.736127+00:00",
   "client": "Ed",
   "inputs": {
     "amount_gbp": 100000,
@@ -16,7 +16,7 @@
       "ask": 1.2755,
       "mid": 1.275,
       "source": "binance",
-      "timestamp": "2026-01-13T20:40:27.783135+00:00",
+      "timestamp": "2026-01-13T20:54:20.237724+00:00",
       "staleness_seconds": 0,
       "spread_bps": 7.84,
       "is_fallback": true
@@ -27,7 +27,7 @@
       "ask": 5.19,
       "mid": 5.1875,
       "source": "binance",
-      "timestamp": "2026-01-13T20:40:34.510515+00:00",
+      "timestamp": "2026-01-13T20:54:25.735968+00:00",
       "staleness_seconds": 0,
       "spread_bps": 9.64,
       "is_fallback": true
@@ -38,7 +38,7 @@
       "ask": 6.619845,
       "mid": 6.61406375,
       "source": "derived",
-      "timestamp": "2026-01-13T20:40:34.510569+00:00",
+      "timestamp": "2026-01-13T20:54:25.736044+00:00",
       "staleness_seconds": 0,
       "spread_bps": 17.48,
       "is_fallback": false
@@ -47,7 +47,7 @@
   "comparison": {
     "amount_gbp": 100000,
     "reference_brl": 661406.375,
-    "timestamp": "2026-01-13T20:40:34.510609+00:00",
+    "timestamp": "2026-01-13T20:54:25.736088+00:00",
     "bank": {
       "name": "Banco Tradicional",
       "brl_received": 650866.2030079999,
@@ -82,13 +82,13 @@
       "winner": "Coins.xyz"
     }
   },
-  "proof_message": "Snapshot \u00a3100,000 \u2192 Bank: R$650,866.20 | Coins: R$661,380.31 | \u0394: R$10,514.11 (158.97 bps). Timestamp: 2026-01-13T20:40:34.510609+00:00. Sources: B, a, n, c, o,  , T, r, a, d, i, c, i, o, n, a, l,  , v, s,  , C, o, i, n, s, ., x, y, z,  , R, a, i, l",
+  "proof_message": "Snapshot \u00a3100,000 \u2192 Bank: R$650,866.20 | Coins: R$661,380.31 | \u0394: R$10,514.11 (158.97 bps). Timestamp: 2026-01-13T20:54:25.736088+00:00. Sources: B, a, n, c, o,  , T, r, a, d, i, c, i, o, n, a, l,  , v, s,  , C, o, i, n, s, ., x, y, z,  , R, a, i, l",
   "audit_trail": {
     "sources": [
       "derived",
       "binance"
     ],
-    "timestamp": "2026-01-13T20:40:34.510609+00:00"
+    "timestamp": "2026-01-13T20:54:25.736088+00:00"
   },
-  "integrity_hash": "32f8ee41d8e06bab6a651d858d5b7e8153fd9d9b700db2f941a2f4136a8ae388"
+  "integrity_hash": "472d02030dd0ce43537c5df00c5473978aa5949704c10c49f69f571e302b37d7"
 }

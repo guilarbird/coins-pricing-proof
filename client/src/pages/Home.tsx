@@ -45,11 +45,21 @@ export default function Home() {
     );
   }
 
-  const prices = snapshot.price_holders;
-  const comp = snapshot.comparison;
-  const bank = comp.bank;
-  const coins = comp.coins;
-  const delta = comp.delta;
+  const prices = snapshot?.price_holders || {};
+  const comp = snapshot?.comparison;
+  const bank = comp?.bank;
+  const coins = comp?.coins;
+  const delta = comp?.delta;
+
+  if (!comp || !bank || !coins || !delta) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-red-500">Erro ao carregar dados</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
