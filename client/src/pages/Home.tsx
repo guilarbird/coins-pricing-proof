@@ -148,13 +148,15 @@ export default function Home() {
       <div className="border-b border-border">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img
-                src={isDark ? '/CoinsXYZ_HorizontalLogo_WhiteWordmark.png' : '/CoinsXYZ_HorizontalLogo_BlackWordmark.png'}
-                alt="Coins.xyz"
-                className="h-8"
-              />
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L18 6V12L12 16L6 12V6L12 2Z" fill="currentColor" className="text-purple-600" />
+                <path d="M12 8L15 10V14L12 16L9 14V10L12 8Z" fill="currentColor" className="text-red-500" />
+              </svg>
+              <span className="font-bold text-lg">Coins.xyz</span>
             </div>
+          </div>
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
               Live
