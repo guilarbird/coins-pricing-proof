@@ -18,13 +18,22 @@ interface SnapshotData {
 
 export default function Home() {
   const [snapshot, setSnapshot] = useState<SnapshotData | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/snapshot.json")
-      .then((res) => res.json())
-      .then((data) => setSnapshot(data))
-      .catch((err) => console.error("Failed to load snapshot:", err));
+    const loadSnapshot = async () => {
+      try {
+        const res = await fetch("/snapshot.json");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setSnapshot(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erro desconhecido");
+        console.error("Failed to load snapshot:", err);
+      }
+    };
+    loadSnapshot();
   }, []);
 
   const copyToClipboard = (text: string, id: string) => {
@@ -33,6 +42,17 @@ export default function Home() {
     toast.success("Copiado");
     setTimeout(() => setCopied(null), 2000);
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Erro ao carregar: {error}</p>
+          <Button onClick={() => window.location.reload()}>Recarregar</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!snapshot) {
     return (
@@ -45,21 +65,20 @@ export default function Home() {
     );
   }
 
-  const prices = snapshot?.price_holders || {};
-  const comp = snapshot?.comparison;
-  const bank = comp?.bank;
-  const coins = comp?.coins;
-  const delta = comp?.delta;
+  const prices = snapshot.price_holders;
+  const comp = snapshot.comparison;
 
-  if (!comp || !bank || !coins || !delta) {
+  if (!comp) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <p className="text-red-500">Erro ao carregar dados</p>
-        </div>
+        <p className="text-red-500">Dados de comparação não encontrados</p>
       </div>
     );
   }
+
+  const bank = comp.bank || {};
+  const coins = comp.coins || {};
+  const delta = comp.delta || {};
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -74,7 +93,7 @@ export default function Home() {
             </div>
           </div>
           <div className="text-xs text-muted-foreground">
-            {new Date(comp.timestamp).toLocaleString("pt-BR")}
+            {comp.timestamp ? new Date(comp.timestamp).toLocaleString("pt-BR") : ""}
           </div>
         </div>
       </header>
@@ -82,7 +101,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container py-12 space-y-16">
         {/* FASE 1: Âncoras de Preço */}
-        <section className="space-y-8 animate-discover">
+        <section className="space-y-8">
           <div className="space-y-2">
             <h2 className="text-3xl font-bold text-foreground">Fase 1: Âncoras de Preço</h2>
             <p className="text-muted-foreground">Qual é o preço do mundo antes de qualquer taxa?</p>
@@ -130,7 +149,7 @@ export default function Home() {
         </div>
 
         {/* FASE 2: Decomposição Bancária */}
-        <section className="space-y-8 animate-discover" style={{ animationDelay: "0.2s" }}>
+        <section className="space-y-8">
           <div className="space-y-2">
             <h2 className="text-3xl font-bold text-foreground">Fase 2: Decomposição Bancária</h2>
             <p className="text-muted-foreground">Como o banco constrói o preço?</p>
@@ -138,37 +157,37 @@ export default function Home() {
 
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle>£{comp.amount_gbp.toLocaleString("pt-BR")} → BRL</CardTitle>
+              <CardTitle>£{(comp.amount_gbp || 0).toLocaleString("pt-BR")} → BRL</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">1. Referência (Mid)</p>
                 <p className="text-2xl font-bold text-foreground">
-                  R${comp.reference_brl.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                  R${(comp.reference_brl || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                 </p>
               </div>
 
               <div className="space-y-2 border-t border-border pt-4">
-                <p className="text-sm text-muted-foreground">2. Custo FX (Markup {bank.fx_markup_bps} bps)</p>
+                <p className="text-sm text-muted-foreground">2. Custo FX (Markup {bank.fx_markup_bps || 0} bps)</p>
                 <p className="text-lg font-bold text-red-500">
-                  -R${bank.fx_cost_brl.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                  -R${(bank.fx_cost_brl || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                 </p>
               </div>
 
               <div className="space-y-2 border-t border-border pt-4">
-                <p className="text-sm text-muted-foreground">3. Taxa Explícita ({bank.fee_pct}%)</p>
+                <p className="text-sm text-muted-foreground">3. Taxa Explícita ({bank.fee_pct || 0}%)</p>
                 <p className="text-lg font-bold text-red-500">
-                  -R${bank.fee_brl.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                  -R${(bank.fee_brl || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                 </p>
               </div>
 
               <div className="space-y-2 border-t border-border pt-4 bg-muted/50 p-4 rounded">
                 <p className="text-sm text-muted-foreground">Total Recebido</p>
                 <p className="text-3xl font-bold text-foreground">
-                  R${bank.brl_received.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                  R${(bank.brl_received || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Custo total: {bank.cost_bps.toFixed(0)} bps
+                  Custo total: {(bank.cost_bps || 0).toFixed(0)} bps
                 </p>
               </div>
             </CardContent>
@@ -186,7 +205,7 @@ export default function Home() {
         </div>
 
         {/* FASE 3: Rail Cripto */}
-        <section className="space-y-8 animate-discover" style={{ animationDelay: "0.4s" }}>
+        <section className="space-y-8">
           <div className="space-y-2">
             <h2 className="text-3xl font-bold text-foreground">Fase 3: Rail Cripto</h2>
             <p className="text-muted-foreground">GBP → USDT → BRL (estruturado diferente)</p>
@@ -194,30 +213,30 @@ export default function Home() {
 
           <Card className="bg-card border-border border-primary/50">
             <CardHeader>
-              <CardTitle>£{comp.amount_gbp.toLocaleString("pt-BR")} → USDT → BRL</CardTitle>
+              <CardTitle>£{(comp.amount_gbp || 0).toLocaleString("pt-BR")} → USDT → BRL</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">1. Referência (Mid)</p>
                 <p className="text-2xl font-bold text-foreground">
-                  R${comp.reference_brl.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                  R${(comp.reference_brl || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                 </p>
               </div>
 
               <div className="space-y-2 border-t border-border pt-4">
-                <p className="text-sm text-muted-foreground">2. Taxa de Rede ({coins.network_fee_usdt} USDT)</p>
+                <p className="text-sm text-muted-foreground">2. Taxa de Rede ({coins.network_fee_usdt || 0} USDT)</p>
                 <p className="text-lg font-bold text-primary">
-                  -R${coins.cost_brl.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                  -R${(coins.cost_brl || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                 </p>
               </div>
 
               <div className="space-y-2 border-t border-border pt-4 bg-primary/10 p-4 rounded">
                 <p className="text-sm text-muted-foreground">Total Recebido</p>
                 <p className="text-3xl font-bold text-primary">
-                  R${coins.brl_received.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                  R${(coins.brl_received || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Custo total: {coins.cost_bps.toFixed(2)} bps
+                  Custo total: {(coins.cost_bps || 0).toFixed(2)} bps
                 </p>
               </div>
             </CardContent>
@@ -232,7 +251,7 @@ export default function Home() {
         </div>
 
         {/* FASE 4: Comparador */}
-        <section className="space-y-8 animate-discover" style={{ animationDelay: "0.6s" }}>
+        <section className="space-y-8">
           <div className="space-y-2">
             <h2 className="text-3xl font-bold text-foreground">Fase 4: Comparação</h2>
             <p className="text-muted-foreground">Lado a lado</p>
@@ -247,13 +266,13 @@ export default function Home() {
                 <div>
                   <p className="text-sm text-muted-foreground">Recebido</p>
                   <p className="text-3xl font-bold text-foreground">
-                    R${bank.brl_received.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                    R${(bank.brl_received || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                   </p>
                 </div>
                 <div className="border-t border-border pt-4">
                   <p className="text-sm text-muted-foreground">Custo</p>
                   <p className="text-2xl font-bold text-red-500">
-                    {bank.cost_bps.toFixed(0)} bps
+                    {(bank.cost_bps || 0).toFixed(0)} bps
                   </p>
                 </div>
               </CardContent>
@@ -267,13 +286,13 @@ export default function Home() {
                 <div>
                   <p className="text-sm text-muted-foreground">Recebido</p>
                   <p className="text-3xl font-bold text-primary">
-                    R${coins.brl_received.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                    R${(coins.brl_received || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
                   </p>
                 </div>
                 <div className="border-t border-border pt-4">
                   <p className="text-sm text-muted-foreground">Custo</p>
                   <p className="text-2xl font-bold text-primary">
-                    {coins.cost_bps.toFixed(2)} bps
+                    {(coins.cost_bps || 0).toFixed(2)} bps
                   </p>
                 </div>
               </CardContent>
@@ -287,10 +306,10 @@ export default function Home() {
             <CardContent className="space-y-2">
               <p className="text-sm text-muted-foreground">Diferença no valor recebido</p>
               <p className="text-4xl font-bold text-primary">
-                +R${delta.brl.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                +R${(delta.brl || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                Economia: {delta.bps.toFixed(2)} bps
+                Economia: {(delta.bps || 0).toFixed(2)} bps
               </p>
             </CardContent>
           </Card>
@@ -304,7 +323,7 @@ export default function Home() {
         </div>
 
         {/* FASE 5: Snapshot de Prova */}
-        <section className="space-y-8 animate-discover" style={{ animationDelay: "0.8s" }}>
+        <section className="space-y-8">
           <div className="space-y-2">
             <h2 className="text-3xl font-bold text-foreground">Fase 5: Prova de Integridade</h2>
             <p className="text-muted-foreground">Mensagem auditável com hash SHA256</p>
