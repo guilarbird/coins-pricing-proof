@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,8 +88,8 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="Coins" className="h-8 w-auto" />
             <div>
-              <h1 className="text-xl font-bold text-foreground">Understanding GBP → BRL Transfers</h1>
-              <p className="text-xs text-muted-foreground">How international transfers are priced</p>
+              <h1 className="text-xl font-bold text-foreground">Coins</h1>
+              <p className="text-xs text-muted-foreground">Understanding GBP → BRL Transfers</p>
             </div>
           </div>
           <div className="text-xs text-muted-foreground">
@@ -100,52 +100,94 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container py-12 space-y-16">
+        {/* OVERVIEW */}
+        <section className="space-y-6 max-w-3xl">
+          <div className="space-y-3">
+            <h1 className="text-4xl font-bold text-foreground">Understanding GBP → BRL Transfers</h1>
+            <p className="text-lg text-muted-foreground">How international transfers are priced — clearly and transparently</p>
+          </div>
+
+          <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+            <p className="text-sm text-foreground">
+              International transfers often look simple on the surface, but the final amount you receive depends heavily on <strong>how</strong> the conversion is structured.
+            </p>
+            <p className="text-sm text-foreground">
+              This page explains, step by step, how a GBP → BRL transfer is priced, where costs are introduced, and why different structures lead to very different outcomes — even for the same amount.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              All numbers below are derived from <strong>public market data</strong>, are <strong>time-stamped</strong>, and can be independently verified.
+            </p>
+          </div>
+        </section>
+
+        {/* Divisor */}
+        <div className="relative py-8">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border"></div>
+          </div>
+        </div>
+
         {/* STEP 1: Market Reference */}
         <section className="space-y-8">
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-foreground">Step 1 — The market price</h2>
+            <h2 className="text-3xl font-bold text-foreground">Step 1 — The market reference price</h2>
             <p className="text-muted-foreground max-w-2xl">
-              This is the market reference for converting GBP to BRL at this moment.
+              <strong>The price of money before any institution intervenes</strong>
             </p>
             <p className="text-sm text-muted-foreground max-w-2xl">
-              It represents the price before any bank is involved, any fee is applied, or any commercial adjustment is made.
+              At any given moment, currencies trade at a market price. This price reflects global supply and demand and exists <strong>before</strong> banks apply FX markups, transfer fees are charged, or commercial adjustments are introduced.
+            </p>
+            <p className="text-sm text-muted-foreground max-w-2xl">
+              This is the <strong>reference point</strong>, not what banks typically execute at.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {Object.entries(prices).map(([pair, data]: any) => (
-              <Card key={pair} className="bg-card border-border">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-mono">{pair}</CardTitle>
-                  <CardDescription className="text-xs">
-                    Source: {data.source} • {data.staleness_seconds}s ago
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Bid</p>
-                    <p className="text-sm font-mono font-bold text-foreground">{data.bid.toFixed(8)}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Ask</p>
-                    <p className="text-sm font-mono font-bold text-foreground">{data.ask.toFixed(8)}</p>
-                  </div>
-                  <div className="border-t border-border pt-3">
-                    <p className="text-xs text-muted-foreground">Mid (Reference)</p>
-                    <p className="text-lg font-mono font-bold text-primary">{data.mid.toFixed(8)}</p>
-                    <Badge variant="outline" className="mt-2 text-xs">
-                      {data.spread_bps.toFixed(2)} bps spread
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4">Market references (live snapshot)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Object.entries(prices).map(([pair, data]: any) => (
+                <Card key={pair} className="bg-card border-border">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg font-mono">{pair}</CardTitle>
+                    <CardDescription className="text-xs">
+                      Source: {data.source} • {data.staleness_seconds}s ago
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">Bid</p>
+                      <p className="text-sm font-mono font-bold text-foreground">{data.bid.toFixed(8)}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">Ask</p>
+                      <p className="text-sm font-mono font-bold text-foreground">{data.ask.toFixed(8)}</p>
+                    </div>
+                    <div className="border-t border-border pt-3">
+                      <p className="text-xs text-muted-foreground">Mid (reference)</p>
+                      <p className="text-lg font-mono font-bold text-primary">{data.mid.toFixed(8)}</p>
+                      <Badge variant="outline" className="mt-2 text-xs">
+                        {data.spread_bps.toFixed(2)} bps spread
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-6">
-            <p className="text-sm text-muted-foreground">
-              <strong>For this example:</strong> £{(comp.amount_gbp || 0).toLocaleString("en-GB")} at market reference = <strong>R${(comp.reference_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}</strong>
-            </p>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground"><strong>Example</strong></p>
+              <p className="text-sm text-foreground">
+                £{(comp.amount_gbp || 0).toLocaleString("en-GB")} at the <strong>market reference price</strong> equals:
+              </p>
+              <p className="text-3xl font-bold text-primary">
+                R${(comp.reference_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                This value represents the theoretical outcome if no party modified the exchange rate.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -164,10 +206,13 @@ export default function Home() {
           <div className="space-y-4">
             <h2 className="text-3xl font-bold text-foreground">Step 2 — The execution rate</h2>
             <p className="text-muted-foreground max-w-2xl">
-              Banks do not execute transfers using the market reference directly.
+              <strong>Where banks change the price before conversion</strong>
             </p>
             <p className="text-sm text-muted-foreground max-w-2xl">
-              Instead, the exchange rate applied to a transfer is adjusted before the conversion takes place. This adjustment changes the rate used to convert your funds.
+              Banks do <strong>not</strong> execute transfers at the market reference price.
+            </p>
+            <p className="text-sm text-muted-foreground max-w-2xl">
+              Before your funds are converted, the exchange rate itself is adjusted using an <strong>FX markup</strong>. This adjustment is embedded in the rate and is <strong>not shown as a fee</strong>.
             </p>
           </div>
 
@@ -184,12 +229,12 @@ export default function Home() {
               </div>
 
               <div className="space-y-2 border-t border-border pt-4">
-                <p className="text-sm text-muted-foreground">Applied adjustment (FX markup: {bank.fx_markup_bps || 0} bps)</p>
+                <p className="text-sm text-muted-foreground">FX markup applied: {bank.fx_markup_bps || 0} basis points (0.80%)</p>
                 <p className="text-lg font-bold text-red-500">
                   −R${(bank.fx_cost_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Execution rate now uses an adjusted reference
+                  This means the conversion starts from a <strong>worse rate</strong> than the market reference.
                 </p>
               </div>
 
@@ -197,6 +242,9 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">Amount after rate adjustment</p>
                 <p className="text-2xl font-bold text-foreground">
                   R${(bank.brl_after_fx || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  At this stage, value is already lost — before any explicit fee appears.
                 </p>
               </div>
             </CardContent>
@@ -218,27 +266,37 @@ export default function Home() {
           <div className="space-y-4">
             <h2 className="text-3xl font-bold text-foreground">Step 3 — The explicit transfer fee</h2>
             <p className="text-muted-foreground max-w-2xl">
-              After the exchange rate is applied, banks typically charge an explicit transfer fee.
+              <strong>A visible fee added after the adjusted rate</strong>
             </p>
             <p className="text-sm text-muted-foreground max-w-2xl">
-              In this example, the fee is {bank.fee_pct || 0}%. This fee is applied on top of a conversion that has already used an adjusted exchange rate.
+              After applying the adjusted exchange rate, banks typically charge an explicit transfer fee.
+            </p>
+            <p className="text-sm text-muted-foreground max-w-2xl">
+              This fee is charged <strong>on top of</strong> a conversion that already used a marked-up rate.
             </p>
           </div>
 
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle>Total cost breakdown</CardTitle>
+              <CardTitle>Final bank outcome</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">After rate adjustment</p>
+                <p className="text-sm text-muted-foreground">Market reference value</p>
                 <p className="text-2xl font-bold text-foreground">
-                  R${(bank.brl_after_fx || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                  R${(comp.reference_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
                 </p>
               </div>
 
               <div className="space-y-2 border-t border-border pt-4">
-                <p className="text-sm text-muted-foreground">Explicit fee ({bank.fee_pct || 0}%)</p>
+                <p className="text-sm text-muted-foreground">FX markup: embedded in rate</p>
+                <p className="text-lg font-bold text-red-500">
+                  −R${(bank.fx_cost_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                </p>
+              </div>
+
+              <div className="space-y-2 border-t border-border pt-4">
+                <p className="text-sm text-muted-foreground">Explicit fee: {bank.fee_pct || 0}%</p>
                 <p className="text-lg font-bold text-red-500">
                   −R${(bank.fee_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
                 </p>
@@ -250,7 +308,7 @@ export default function Home() {
                   R${(bank.brl_received || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Total cost: {(bank.cost_bps || 0).toFixed(0)} basis points
+                  <strong>Total cost: {(bank.cost_bps || 0).toFixed(0)} basis points</strong>
                 </p>
               </div>
             </CardContent>
@@ -289,7 +347,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-2 border-t border-border pt-4">
-                <p className="text-sm text-muted-foreground">Network cost ({coins.network_fee_usdt || 0} USDT)</p>
+                <p className="text-sm text-muted-foreground">Network cost: {coins.network_fee_usdt || 0} USDT</p>
                 <p className="text-lg font-bold text-primary">
                   −R${(coins.cost_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
                 </p>
@@ -304,7 +362,7 @@ export default function Home() {
                   R${(coins.brl_received || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Total cost: {(coins.cost_bps || 0).toFixed(2)} basis points
+                  <strong>Total cost: {(coins.cost_bps || 0).toFixed(2)} basis points</strong>
                 </p>
               </div>
             </CardContent>
@@ -389,7 +447,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* AUDIT & VERIFICATION */}
+        {/* VERIFICATION */}
         <section className="space-y-8">
           <div className="space-y-4">
             <h2 className="text-3xl font-bold text-foreground">Verification & Sources</h2>
