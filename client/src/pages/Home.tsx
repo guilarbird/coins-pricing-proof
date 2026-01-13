@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Copy, Check, ArrowRight } from "lucide-react";
+import { Copy, Check, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -209,10 +209,7 @@ export default function Home() {
               <strong>Where banks change the price before conversion</strong>
             </p>
             <p className="text-sm text-muted-foreground max-w-2xl">
-              Banks do <strong>not</strong> execute transfers at the market reference price.
-            </p>
-            <p className="text-sm text-muted-foreground max-w-2xl">
-              Before your funds are converted, the exchange rate itself is adjusted using an <strong>FX markup</strong>. This adjustment is embedded in the rate and is <strong>not shown as a fee</strong>.
+              Banks do <strong>not</strong> execute transfers at the market reference price. Before your funds are converted, the exchange rate itself is adjusted using an <strong>FX markup</strong>. This adjustment is embedded in the rate and is <strong>not shown as a fee</strong>.
             </p>
           </div>
 
@@ -269,10 +266,7 @@ export default function Home() {
               <strong>A visible fee added after the adjusted rate</strong>
             </p>
             <p className="text-sm text-muted-foreground max-w-2xl">
-              After applying the adjusted exchange rate, banks typically charge an explicit transfer fee.
-            </p>
-            <p className="text-sm text-muted-foreground max-w-2xl">
-              This fee is charged <strong>on top of</strong> a conversion that already used a marked-up rate.
+              After applying the adjusted exchange rate, banks typically charge an explicit transfer fee. This fee is charged <strong>on top of</strong> a conversion that already used a marked-up rate.
             </p>
           </div>
 
@@ -330,7 +324,7 @@ export default function Home() {
           <div className="space-y-4">
             <h2 className="text-3xl font-bold text-foreground">Step 4 — Using the market price directly</h2>
             <p className="text-muted-foreground max-w-2xl">
-              It is possible to structure a conversion where the market reference rate is used directly, all costs are explicit and visible, and no adjustment is applied to the exchange rate itself.
+              It is possible to structure a conversion where the market reference rate is used directly, no FX markup is applied to the exchange rate, and all costs are explicit, flat, and visible.
             </p>
           </div>
 
@@ -347,7 +341,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-2 border-t border-border pt-4">
-                <p className="text-sm text-muted-foreground">Network cost: {coins.network_fee_usdt || 0} USDT</p>
+                <p className="text-sm text-muted-foreground">Network cost: {coins.network_fee_usdt || 0} USDT (~R${(coins.cost_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })})</p>
                 <p className="text-lg font-bold text-primary">
                   −R${(coins.cost_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
                 </p>
@@ -367,6 +361,113 @@ export default function Home() {
               </div>
             </CardContent>
           </Card>
+        </section>
+
+        {/* Divisor */}
+        <div className="relative py-8">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border"></div>
+          </div>
+        </div>
+
+        {/* FLOW DIAGRAMS - Dark Section */}
+        <section className="space-y-8 -mx-4 px-4 py-12 bg-gradient-to-b from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 rounded-lg">
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold text-white">How the structures differ</h2>
+            <p className="text-slate-300 max-w-2xl">
+              Visual comparison of cost erosion in traditional bank transfers vs. market-based structures.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Traditional Bank Flow */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-white">Traditional bank transfer</h3>
+              <div className="space-y-3">
+                <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
+                  <p className="text-sm text-slate-200 font-mono">GBP</p>
+                  <p className="text-2xl font-bold text-white">£{(comp.amount_gbp || 0).toLocaleString("en-GB")}</p>
+                </div>
+                <div className="flex justify-center">
+                  <ArrowDown className="w-6 h-6 text-red-400" />
+                </div>
+                <div className="bg-red-900/30 border border-red-700 rounded-lg p-4">
+                  <p className="text-xs text-red-300 mb-1">FX Markup Applied</p>
+                  <p className="text-sm text-red-200 font-mono">−{bank.fx_markup_bps || 0} bps</p>
+                </div>
+                <div className="flex justify-center">
+                  <ArrowDown className="w-6 h-6 text-slate-400" />
+                </div>
+                <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
+                  <p className="text-xs text-slate-300 mb-1">Adjusted Exchange Rate</p>
+                  <p className="text-xl font-bold text-white">
+                    R${(bank.brl_after_fx || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                  </p>
+                </div>
+                <div className="flex justify-center">
+                  <ArrowDown className="w-6 h-6 text-red-400" />
+                </div>
+                <div className="bg-red-900/30 border border-red-700 rounded-lg p-4">
+                  <p className="text-xs text-red-300 mb-1">Explicit Fee</p>
+                  <p className="text-sm text-red-200 font-mono">−{bank.fee_pct || 0}%</p>
+                </div>
+                <div className="flex justify-center">
+                  <ArrowDown className="w-6 h-6 text-red-400" />
+                </div>
+                <div className="bg-red-950/50 border border-red-700 rounded-lg p-4">
+                  <p className="text-xs text-red-300 mb-1">BRL Received</p>
+                  <p className="text-2xl font-bold text-red-200">
+                    R${(bank.brl_received || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                  </p>
+                  <p className="text-xs text-red-300 mt-2">Cost: {(bank.cost_bps || 0).toFixed(0)} bps</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Market-Based Flow */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-white">Market-based structure</h3>
+              <div className="space-y-3">
+                <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
+                  <p className="text-sm text-slate-200 font-mono">GBP</p>
+                  <p className="text-2xl font-bold text-white">£{(comp.amount_gbp || 0).toLocaleString("en-GB")}</p>
+                </div>
+                <div className="flex justify-center">
+                  <ArrowDown className="w-6 h-6 text-primary" />
+                </div>
+                <div className="bg-primary/20 border border-primary rounded-lg p-4">
+                  <p className="text-xs text-primary/80 mb-1">Market Reference Rate</p>
+                  <p className="text-sm text-primary font-mono">No adjustment</p>
+                </div>
+                <div className="flex justify-center">
+                  <ArrowDown className="w-6 h-6 text-slate-400" />
+                </div>
+                <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
+                  <p className="text-xs text-slate-300 mb-1">USDT Intermediate</p>
+                  <p className="text-xl font-bold text-white">
+                    R${(comp.reference_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                  </p>
+                </div>
+                <div className="flex justify-center">
+                  <ArrowDown className="w-6 h-6 text-primary" />
+                </div>
+                <div className="bg-primary/20 border border-primary rounded-lg p-4">
+                  <p className="text-xs text-primary/80 mb-1">Network Cost</p>
+                  <p className="text-sm text-primary font-mono">−R${(coins.cost_brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}</p>
+                </div>
+                <div className="flex justify-center">
+                  <ArrowDown className="w-6 h-6 text-primary" />
+                </div>
+                <div className="bg-primary/30 border border-primary rounded-lg p-4">
+                  <p className="text-xs text-primary/80 mb-1">BRL Received</p>
+                  <p className="text-2xl font-bold text-primary">
+                    R${(coins.brl_received || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                  </p>
+                  <p className="text-xs text-primary/80 mt-2">Cost: {(coins.cost_bps || 0).toFixed(2)} bps</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Divisor */}
@@ -405,7 +506,7 @@ export default function Home() {
 
             <Card className="bg-card border-border border-primary/50">
               <CardHeader>
-                <CardTitle className="text-lg text-primary">Alternative structure</CardTitle>
+                <CardTitle className="text-lg text-primary">Market-based structure</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -426,16 +527,26 @@ export default function Home() {
 
           <Card className="bg-primary/10 border-primary/50">
             <CardHeader>
-              <CardTitle className="text-primary">Difference</CardTitle>
+              <CardTitle className="text-primary">Net difference</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-sm text-muted-foreground">Additional amount received</p>
-              <p className="text-4xl font-bold text-primary">
-                +R${(delta.brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Cost difference: {(delta.bps || 0).toFixed(2)} basis points
-              </p>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Additional amount received</p>
+                <p className="text-4xl font-bold text-primary">
+                  +R${(delta.brl || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                </p>
+              </div>
+              <div className="border-t border-border pt-4">
+                <p className="text-sm text-muted-foreground">Cost difference</p>
+                <p className="text-lg text-primary">
+                  {(delta.bps || 0).toFixed(2)} basis points
+                </p>
+              </div>
+              <div className="border-t border-border pt-4 bg-primary/5 p-3 rounded">
+                <p className="text-xs text-muted-foreground">
+                  Same £{(comp.amount_gbp || 0).toLocaleString("en-GB")}. Different structure. Materially different outcome.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </section>
@@ -450,9 +561,9 @@ export default function Home() {
         {/* VERIFICATION */}
         <section className="space-y-8">
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-foreground">Verification & Sources</h2>
+            <h2 className="text-3xl font-bold text-foreground">Verification & data integrity</h2>
             <p className="text-muted-foreground">
-              All numbers are derived from public market data and can be verified through the integrity hash below.
+              All figures are derived from public market data and generated at the timestamp below.
             </p>
           </div>
 
@@ -543,7 +654,7 @@ export default function Home() {
         <div className="container text-center text-xs text-muted-foreground">
           <p>
             This page demonstrates how international transfers are structured and priced.
-            All calculations are based on public market data with verifiable integrity.
+            All calculations are reproducible, time-stamped, and verifiable.
           </p>
         </div>
       </footer>
