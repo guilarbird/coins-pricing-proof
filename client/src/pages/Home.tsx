@@ -93,8 +93,8 @@ export default function Home() {
     );
   }
 
-  const gbpusd = snapshot.prices.GBPUSD?.mid || 1.27;
-  const usdbrl = snapshot.prices.USDBRL?.mid || 5.19;
+  const gbpusd = snapshot?.prices?.GBPUSD?.mid || 1.27;
+  const usdbrl = snapshot?.prices?.USDBRL?.mid || 5.19;
   const gbpbrl = gbpusd * usdbrl;
 
   // Calculations for custom amount
