@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useTranslations } from '@/hooks/useTranslations';
 import { LanguageContext } from '@/contexts/LanguageContext';
 import { DEFAULT_PRICING_MODELS, calculateFinalAmount } from '@/lib/pricing-model';
@@ -17,12 +17,69 @@ import { BidAskSpreadDiagram } from '@/components/BidAskSpreadDiagram';
  */
 const USE_V0_UI = import.meta.env.VITE_USE_V0_UI === 'true';
 
+// Declare modulePath as a variable to avoid Vite static analysis
+// Use dynamic import path to avoid Vite's static resolution
+const getV0ModulePath = () => '../v0_full/pages/V0Preview';
+
+// Declare importModule on globalThis to avoid Vite's static analysis
+if (typeof globalThis !== 'undefined' && !(globalThis as any).importModule) {
+  (globalThis as any).importModule = (path: string) => import(path);
+}
+
+// V0Loader component - dynamically imports v0_full/pages/V0Preview
+function V0Loader() {
+  const [V0Component, setV0Component] = useState<React.ComponentType | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const modulePath = getV0ModulePath();
+        const importFunc = (globalThis as any).importModule || ((path: string) => import(path));
+        const module = await importFunc(modulePath);
+        setV0Component(() => module.V0Preview || module.default);
+      } catch (err) {
+        setError(
+          'V0 UI not available. Please ensure PR #10 is merged or disable VITE_USE_V0_UI.'
+        );
+      }
+    })();
+  }, []);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">V0 UI Not Available</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:opacity-90"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!V0Component) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+        <div className="text-center">
+          <div className="animate-pulse">Loading v0 UI…</div>
+        </div>
+      </div>
+    );
+  }
+
+  return <V0Component />;
+}
+
 export default function Home() {
-  // Feature flag check - when v0_full is merged, this will render V0Preview
-  // For now, always render current UI
-  if (USE_V0_UI && false) {
-    // TODO: Import V0Preview from v0_full after PR #10 is merged
-    // return <V0Preview />;
+  // Feature flag check - render v0 UI if enabled
+  if (USE_V0_UI) {
+    return <V0Loader />;
   }
   const { t, language } = useTranslations();
   const { setLanguage } = useContext(LanguageContext);
