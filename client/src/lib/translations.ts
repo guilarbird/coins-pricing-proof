@@ -31,6 +31,8 @@ const translations = {
     
     // Pricing Components
     spread: 'Spread',
+    spreadBps: 'Spread de FX',
+    bps: 'bps',
     fee: 'Taxa',
     iofTax: 'Imposto IOF',
     youReceive: 'Você recebe',
@@ -104,6 +106,8 @@ const translations = {
     
     // Pricing Components
     spread: 'Spread',
+    spreadBps: 'FX Spread',
+    bps: 'bps',
     fee: 'Fee',
     iofTax: 'IOF Tax',
     youReceive: 'You receive',
@@ -177,6 +181,8 @@ const translations = {
     
     // Pricing Components
     spread: '点差',
+    spreadBps: 'FX 点差',
+    bps: '基点',
     fee: '费用',
     iofTax: 'IOF 税',
     youReceive: '您收到',

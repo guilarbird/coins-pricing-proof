@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { useTranslations } from '@/hooks/useTranslations';
 import { LanguageContext } from '@/contexts/LanguageContext';
+import { DEFAULT_PRICING_MODELS, calculateFinalAmount } from '@/lib/pricing-model';
 
 export default function Home() {
   const { t, language } = useTranslations();
@@ -16,47 +17,25 @@ export default function Home() {
   // USER INPUTS (ADJUSTABLE)
   // ============================================================================
   const [gbpAmount, setGbpAmount] = useState(1000);
-  const [bankSpreadBps, setBankSpreadBps] = useState(80);
-  const [bankFeePct, setBankFeePct] = useState(0.8);
-  const [iofTaxPct] = useState(3.5);
-  const [coinsNetworkFeeUsd] = useState(5);
+  const [bankSpreadBpsOverride, setBankSpreadBpsOverride] = useState<number | undefined>(undefined);
+  
+  // Use default pricing models
+  const pricingModels = DEFAULT_PRICING_MODELS;
 
   // ============================================================================
-  // CALCULATIONS
+  // CALCULATIONS USING PRICING MODELS
   // ============================================================================
-  const marketReferenceAmount = gbpAmount * MARKET_MID_GBPBRL;
-
-  // BANK TRANSFER MODEL
-  const bankExecutionRate = MARKET_MID_GBPBRL * (1 - bankSpreadBps / 10000);
-  const bankAfterSpread = gbpAmount * bankExecutionRate;
-  const bankSpreadCost = marketReferenceAmount - bankAfterSpread;
-  const bankExplicitFee = bankAfterSpread * (bankFeePct / 100);
-  const bankIofTax = bankAfterSpread * (iofTaxPct / 100);
-  const bankFinalAmount = bankAfterSpread - bankExplicitFee - bankIofTax;
-  const bankTotalCost = bankSpreadCost + bankExplicitFee + bankIofTax;
-  const bankTotalCostPct = (bankTotalCost / marketReferenceAmount) * 100;
-
-  // WISE TRANSFER MODEL
-  const WISE_FIXED_FEE_GBP = 9.99;
-  const wiseAfterFee = gbpAmount - WISE_FIXED_FEE_GBP;
-  const wiseAfterConversion = wiseAfterFee * MARKET_MID_GBPBRL;
-  const wiseIofTax = wiseAfterConversion * (iofTaxPct / 100);
-  const wiseFinalAmount = wiseAfterConversion - wiseIofTax;
-  const wiseTotalCost = (gbpAmount * MARKET_MID_GBPBRL) - wiseFinalAmount;
-  const wiseTotalCostPct = (wiseTotalCost / marketReferenceAmount) * 100;
-
-  // COINS TRANSFER MODEL
-  const USDBRL_RATE = 5.19;
-  const coinsNetworkFeeBrl = coinsNetworkFeeUsd * USDBRL_RATE;
-  const coinsAfterNetwork = marketReferenceAmount - coinsNetworkFeeBrl;
-  const coinsIofTax = coinsAfterNetwork * (iofTaxPct / 100);
-  const coinsFinalAmount = coinsAfterNetwork - coinsIofTax;
-  const coinsTotalCost = marketReferenceAmount - coinsFinalAmount;
-  const coinsTotalCostPct = (coinsTotalCost / marketReferenceAmount) * 100;
-
+  const bankModel = pricingModels[0];
+  const wiseModel = pricingModels[1];
+  const coinsModel = pricingModels[2];
+  
+  const bankCalc = calculateFinalAmount(gbpAmount, MARKET_MID_GBPBRL, bankModel, bankSpreadBpsOverride);
+  const wiseCalc = calculateFinalAmount(gbpAmount, MARKET_MID_GBPBRL, wiseModel);
+  const coinsCalc = calculateFinalAmount(gbpAmount, MARKET_MID_GBPBRL, coinsModel);
+  
   // COMPARISONS
-  const coinsVsBankSavings = bankFinalAmount - coinsFinalAmount;
-  const coinsVsWiseSavings = wiseFinalAmount - coinsFinalAmount;
+  const coinsVsBankSavings = bankCalc.finalAmount - coinsCalc.finalAmount;
+  const coinsVsWiseSavings = wiseCalc.finalAmount - coinsCalc.finalAmount;
 
   // Locale formatting helper
   const formatCurrency = (amount: number) => {
@@ -188,26 +167,26 @@ export default function Home() {
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t('spread')}:</span>
-                  <span className="font-mono">{bankSpreadBps} bps</span>
+                  <span className="text-muted-foreground">{t('spreadBps')}:</span>
+                  <span className="font-mono">{bankSpreadBpsOverride ?? bankModel.fxSpreadBps} {t('bps')}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t('fee')}:</span>
-                  <span className="font-mono">{bankFeePct}%</span>
+                  <span className="font-mono">{bankModel.explicitFeeValue}{bankModel.explicitFeeType === 'percentage' ? '%' : ''}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t('iofTax')}:</span>
-                  <span className="font-mono">{iofTaxPct}%</span>
+                  <span className="font-mono">{typeof bankModel.iofTaxPct === 'number' ? `${bankModel.iofTaxPct}%` : t('structureDependent')}</span>
                 </div>
               </div>
 
               <div className="border-t border-red-900/30 pt-4">
                 <div className="text-xs text-muted-foreground mb-1">{t('youReceive')}</div>
                 <div className="text-2xl font-bold text-red-400 mb-2">
-                  R${formatCurrency(bankFinalAmount)}
+                  R${formatCurrency(bankCalc.finalAmount)}
                 </div>
                 <div className="text-xs text-red-400">
-                  {t('cost')}: R${formatCurrency(bankTotalCost)} ({bankTotalCostPct.toFixed(2)}%)
+                  {t('cost')}: R${formatCurrency(bankCalc.totalCostBrl)} ({bankCalc.totalCostPct.toFixed(2)}%)
                 </div>
               </div>
 
@@ -220,31 +199,13 @@ export default function Home() {
                     min="0"
                     max="200"
                     step="10"
-                    value={bankSpreadBps}
-                    onChange={(e) => setBankSpreadBps(Number(e.target.value))}
+                    value={bankSpreadBpsOverride ?? bankModel.fxSpreadBps}
+                    onChange={(e) => setBankSpreadBpsOverride(Number(e.target.value))}
                     className="w-full"
                     aria-label={t('adjustSpread')}
                   />
                   <div className="text-xs text-muted-foreground mt-1">
-                    {bankSpreadBps} bps = {(bankSpreadBps / 100).toFixed(2)}%
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium mb-2 block">
-                    {t('fee')} (%):
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="3"
-                    step="0.1"
-                    value={bankFeePct}
-                    onChange={(e) => setBankFeePct(Number(e.target.value))}
-                    className="w-full"
-                    aria-label={t('fee')}
-                  />
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {bankFeePct.toFixed(1)}%
+                    {bankSpreadBpsOverride ?? bankModel.fxSpreadBps} {t('bps')} = {((bankSpreadBpsOverride ?? bankModel.fxSpreadBps) / 100).toFixed(2)}%
                   </div>
                 </div>
               </div>
@@ -259,26 +220,26 @@ export default function Home() {
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t('spread')}</span>
-                  <span className="font-mono">0 bps</span>
+                  <span className="text-muted-foreground">{t('spreadBps')}</span>
+                  <span className="font-mono">{wiseModel.fxSpreadBps} {t('bps')}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t('fee')}</span>
-                  <span className="font-mono">£9.99</span>
+                  <span className="font-mono">£{wiseModel.explicitFeeValue}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t('iofTax')}</span>
-                  <span className="font-mono">{iofTaxPct}%</span>
+                  <span className="font-mono">{typeof wiseModel.iofTaxPct === 'number' ? `${wiseModel.iofTaxPct}%` : t('structureDependent')}</span>
                 </div>
               </div>
 
               <div className="border-t border-yellow-900/30 pt-4">
                 <div className="text-xs text-muted-foreground mb-1">{t('youReceive')}</div>
                 <div className="text-2xl font-bold text-yellow-400 mb-2">
-                  R${formatCurrency(wiseFinalAmount)}
+                  R${formatCurrency(wiseCalc.finalAmount)}
                 </div>
                 <div className="text-xs text-yellow-400">
-                  {t('cost')}: R${formatCurrency(wiseTotalCost)} ({wiseTotalCostPct.toFixed(2)}%)
+                  {t('cost')}: R${formatCurrency(wiseCalc.totalCostBrl)} ({wiseCalc.totalCostPct.toFixed(2)}%)
                 </div>
               </div>
             </div>
@@ -292,26 +253,26 @@ export default function Home() {
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t('spread')}</span>
-                  <span className="font-mono">0 bps</span>
+                  <span className="text-muted-foreground">{t('spreadBps')}</span>
+                  <span className="font-mono">{coinsModel.fxSpreadBps} {t('bps')}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t('fee')}</span>
-                  <span className="font-mono">$5 USD</span>
+                  <span className="font-mono">${coinsModel.explicitFeeValue} USD</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t('iofTax')}</span>
-                  <span className="font-mono">{t('structureDependent')}</span>
+                  <span className="font-mono">{typeof coinsModel.iofTaxPct === 'number' ? `${coinsModel.iofTaxPct}%` : t('structureDependent')}</span>
                 </div>
               </div>
 
               <div className="border-t border-green-900/30 pt-4">
                 <div className="text-xs text-muted-foreground mb-1">{t('youReceive')}</div>
                 <div className="text-2xl font-bold text-green-400 mb-2">
-                  R${formatCurrency(coinsFinalAmount)}
+                  R${formatCurrency(coinsCalc.finalAmount)}
                 </div>
                 <div className="text-xs text-green-400">
-                  {t('cost')}: R${formatCurrency(coinsTotalCost)} ({coinsTotalCostPct.toFixed(2)}%)
+                  {t('cost')}: R${formatCurrency(coinsCalc.totalCostBrl)} ({coinsCalc.totalCostPct.toFixed(2)}%)
                 </div>
               </div>
 
