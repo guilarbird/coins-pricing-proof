@@ -11,9 +11,9 @@ import V0Preview from "./pages/V0Preview";
 function Router() {
   return (
     <Switch>
-      <Route path={\"\"} component={Home} />
-      <Route path={\"/v0\"} component={V0Preview} />
-      <Route path={\"/404\"} component={NotFound} />
+      <Route path="" component={Home} />
+      <Route path="/v0" component={V0Preview} />
+      <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
