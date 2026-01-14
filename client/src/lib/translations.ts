@@ -70,6 +70,7 @@ const translations = {
     ratesUpdated: 'Taxas atualizadas em tempo real de APIs Wise e Binance. IOF varia por estrutura de liquidação. Todos os cálculos são transparentes e auditáveis.',
     
     // Diagrams
+    howItWorks: 'Como Funciona',
     pathOfYourMoney: 'O Caminho do Seu Dinheiro',
     deconstructingFxSpreads: 'Decompondo Spreads de FX',
     impactOfWideSpreads: 'O Impacto de Spreads Largos',
@@ -148,6 +149,7 @@ const translations = {
     ratesUpdated: 'Rates updated in real-time from Wise and Binance APIs. IOF varies by settlement structure. All calculations are transparent and auditable.',
     
     // Diagrams
+    howItWorks: 'How It Works',
     pathOfYourMoney: 'The Path of Your Money',
     deconstructingFxSpreads: 'Deconstructing FX Spreads',
     impactOfWideSpreads: 'The Impact of Wide Spreads',
