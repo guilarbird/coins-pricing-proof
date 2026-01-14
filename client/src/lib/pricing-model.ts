@@ -21,6 +21,8 @@ export interface PricingModel {
   // Can be fixed or structure-dependent
   iofTaxPct: number | 'structure-dependent';
   iofDescription: string;
+  iofStandardPct?: number; // Used when regime = 'standard'
+  iofOptimizedPct?: number; // Used when regime = 'optimized'
 
   // Metadata
   settlementMethod: 'swift' | 'direct' | 'stablecoin';
@@ -39,6 +41,8 @@ export const DEFAULT_PRICING_MODELS: PricingModel[] = [
     explicitFeeType: 'percentage',
     explicitFeeValue: 0.8,
     iofTaxPct: 3.5,
+    iofStandardPct: 3.5,
+    iofOptimizedPct: 3.5,
     iofDescription: 'Full IOF (3.5%) applies',
     settlementMethod: 'swift',
     settlementTime: '3-5 business days',
@@ -51,6 +55,8 @@ export const DEFAULT_PRICING_MODELS: PricingModel[] = [
     explicitFeeType: 'fixed_gbp',
     explicitFeeValue: 9.99,
     iofTaxPct: 3.5,
+    iofStandardPct: 3.5,
+    iofOptimizedPct: 3.5,
     iofDescription: 'Full IOF (3.5%) applies',
     settlementMethod: 'direct',
     settlementTime: '1-2 business days',
@@ -63,7 +69,9 @@ export const DEFAULT_PRICING_MODELS: PricingModel[] = [
     explicitFeeType: 'fixed_usd',
     explicitFeeValue: 5,
     iofTaxPct: 'structure-dependent',
-    iofDescription: 'Depends on settlement structure (can be ~1% with local settlement)',
+    iofStandardPct: 3.5,
+    iofOptimizedPct: 1.0,
+    iofDescription: 'Depends on settlement structure (Standard: 3.5%, Optimized: ~1%)',
     settlementMethod: 'stablecoin',
     settlementTime: '< 1 hour',
   },
@@ -77,6 +85,7 @@ export function calculateFinalAmount(
   marketMidRate: number,
   model: PricingModel,
   overrideSpreadBps?: number,
+  iofRegime?: 'standard' | 'optimized',
 ): {
   marketReferenceAmount: number;
   fxSpreadCost: number;
@@ -85,6 +94,7 @@ export function calculateFinalAmount(
   finalAmount: number;
   totalCostBrl: number;
   totalCostPct: number;
+  iofTaxPct: number;
 } {
   const spreadBps = overrideSpreadBps ?? model.fxSpreadBps;
   const marketReferenceAmount = gbpAmount * marketMidRate;
@@ -111,7 +121,17 @@ export function calculateFinalAmount(
   }
 
   // Apply IOF tax
-  const iofTaxPct = typeof model.iofTaxPct === 'number' ? model.iofTaxPct : 3.5;
+  let iofTaxPct = 3.5; // Default
+  if (typeof model.iofTaxPct === 'number') {
+    iofTaxPct = model.iofTaxPct;
+  } else if (model.iofTaxPct === 'structure-dependent') {
+    // Use regime to determine IOF
+    if (iofRegime === 'optimized' && model.iofOptimizedPct !== undefined) {
+      iofTaxPct = model.iofOptimizedPct;
+    } else if (model.iofStandardPct !== undefined) {
+      iofTaxPct = model.iofStandardPct;
+    }
+  }
   const iofTaxCost = amountAfterFee * (iofTaxPct / 100);
   const finalAmount = amountAfterFee - iofTaxCost;
 
@@ -126,5 +146,6 @@ export function calculateFinalAmount(
     finalAmount,
     totalCostBrl,
     totalCostPct,
+    iofTaxPct,
   };
 }
