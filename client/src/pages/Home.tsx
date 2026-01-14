@@ -5,8 +5,16 @@ import { DEFAULT_PRICING_MODELS, calculateFinalAmount } from '@/lib/pricing-mode
 import { CostLayersDiagram } from '@/components/CostLayersDiagram';
 import { SWIFTMazeDiagram } from '@/components/SWIFTMazeDiagram';
 import { BidAskSpreadDiagram } from '@/components/BidAskSpreadDiagram';
+import V0Preview from './V0Preview';
+
+// Feature flag: Use v0 UI instead of current UI
+const USE_V0_UI = import.meta.env.VITE_USE_V0_UI === 'true';
 
 export default function Home() {
+  // If v0 UI feature flag is enabled, render v0 preview instead
+  if (USE_V0_UI) {
+    return <V0Preview />;
+  }
   const { t, language } = useTranslations();
   const { setLanguage } = useContext(LanguageContext);
 
