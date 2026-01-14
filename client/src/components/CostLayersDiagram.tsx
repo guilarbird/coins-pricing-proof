@@ -19,13 +19,13 @@ export function CostLayersDiagram({
   const { t } = useTranslations();
 
   const calc = calculateFinalAmount(gbpAmount, marketMidRate, selectedModel, undefined, iofRegime);
-  const marketRef = calc.marketReferenceAmount;
+  const marketRef = calc?.marketReferenceAmount ?? (gbpAmount * marketMidRate) ?? 0;
 
-  // Calculate percentages for visualization
-  const spreadPct = (calc.fxSpreadCost / marketRef) * 100;
-  const feePct = (calc.explicitFeeCost / marketRef) * 100;
-  const iofPct = (calc.iofTaxCost / marketRef) * 100;
-  const receivedPct = (calc.finalAmount / marketRef) * 100;
+  // Calculate percentages for visualization (with division by zero protection)
+  const spreadPct = marketRef > 0 ? (calc.fxSpreadCost / marketRef) * 100 : 0;
+  const feePct = marketRef > 0 ? (calc.explicitFeeCost / marketRef) * 100 : 0;
+  const iofPct = marketRef > 0 ? (calc.iofTaxCost / marketRef) * 100 : 0;
+  const receivedPct = marketRef > 0 ? (calc.finalAmount / marketRef) * 100 : 0;
 
   return (
     <div className="space-y-6">
