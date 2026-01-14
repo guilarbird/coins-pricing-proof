@@ -1,0 +1,94 @@
+{
+  "title": "Digital FX",
+  "subtitle": "Understand how exchange rates are priced. No secrets.",
+  "updatedNow": "Updated now",
+  "language": "Language",
+  "pt": "PT",
+  "en": "EN",
+  "zh": "ZH",
+
+  "marketReference": "Market Reference",
+  "gbpUsd": "GBP/USD",
+  "midMarket": "Mid-market",
+  "bid": "Bid (Buy)",
+  "ask": "Ask (Sell)",
+  "spreadOfChange": "FX Spread",
+
+  "transferSimulator": "Transfer Simulator",
+  "youSend": "You send",
+  "gbp": "GBP",
+  "youReceive": "You receive",
+  "brl": "BRL",
+  "simulateNow": "Simulate Now",
+  "createAccount": "Create Account",
+
+  "auditSummary": {
+    "title": "Audit Summary",
+    "youSend": "You send",
+    "marketBaseline": "Market Baseline (mid-market)",
+    "youReceiveCoins": "You receive (Coins)",
+    "savingsVsBank": "Savings vs Bank",
+    "savingsVsWise": "Difference vs Wise",
+    "allCostsShown": "All costs shown",
+    "sourcesLinked": "Sources linked",
+    "updatedEvery": "Updated every 30s",
+    "conclusion": "All providers start from the same market reference. The difference is the settlement structure: number of intermediaries, where fees are embedded, and how taxes apply. Coins focuses on market execution with fewer layers, making costs visible and measurable."
+  },
+
+  "costStack": {
+    "title": "Where Each Provider Takes Their Cut",
+    "baseline": "Market Reference (100%)",
+    "bank": "Traditional Bank",
+    "wise": "Wise",
+    "coins": "Coins",
+    "youReceive": "You receive",
+    "spread": "Spread",
+    "fee": "Fee",
+    "iof": "IOF",
+    "swift": "SWIFT/Correspondent",
+    "network": "Network",
+    "structure": "Structure",
+    "insight": "Each intermediary adds costs. Coins reduces intermediaries, letting more of your money arrive."
+  },
+
+  "stablecoinRail": {
+    "title": "What is a Stablecoin Settlement Rail?",
+    "definition": "Stablecoin = Digital dollar",
+    "usedAs": "Used as settlement rail",
+    "movesValue": "Moves value like a wire transfer, but with fewer intermediaries",
+    "priceFrom": "Price comes from open market",
+    "insight": "Stablecoin is not a 'bet'. It's settlement infrastructure. USDT is dollar-pegged and used for settlement between markets."
+  },
+
+  "diagrams": {
+    "pathOfMoney": {
+      "title": "The Path of Your Money",
+      "description": "GBP → FX Market → Bank/Wise/Coins Route → Local Bank/SWIFT"
+    },
+    "deconstructingSpreads": {
+      "title": "Deconstructing FX Spreads",
+      "description": "Tubo de vidro mostrando layers de custos ocultos"
+    },
+    "impactOfSpreads": {
+      "title": "The Impact of Wide Spreads",
+      "description": "0.3% parece pouco, mas em £100k vira muito."
+    },
+    "whyIOFVaries": {
+      "title": "Why IOF Tax Varies",
+      "description": "Foreign Banks = 3.5% IOF vs Local Settlement = ~1.0% IOF"
+    },
+    "swiftMaze": {
+      "title": "SWIFT Maze vs Direct Path",
+      "description": "Traditional Bank com múltiplos intermediários vs Market-based com caminho direto"
+    }
+  },
+
+  "dataSource": "Data sources",
+  "fxReference": "FX reference",
+  "cryptoReference": "Crypto reference",
+  "coinsExecution": "Coins execution",
+  "timestamp": "Timestamp",
+  "showCalculationSteps": "Show calculation steps",
+
+  "footer": "Rates updated in real-time from Wise and Binance APIs. IOF varies by settlement structure. All calculations are transparent and auditable."
+}
