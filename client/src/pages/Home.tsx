@@ -5,6 +5,10 @@ import { DEFAULT_PRICING_MODELS, calculateFinalAmount } from '@/lib/pricing-mode
 import { CostLayersDiagram } from '@/components/CostLayersDiagram';
 import { SWIFTMazeDiagram } from '@/components/SWIFTMazeDiagram';
 import { BidAskSpreadDiagram } from '@/components/BidAskSpreadDiagram';
+import { MethodAndSources } from '@/components/MethodAndSources';
+import { FAQAccordion } from '@/components/FAQAccordion';
+import { AudioPlayer } from '@/components/AudioPlayer';
+import { InstitutionalFooter } from '@/components/InstitutionalFooter';
 
 export default function Home() {
   const { t, language } = useTranslations();
@@ -365,6 +369,26 @@ export default function Home() {
           {/* SWIFT Maze Diagram */}
           <SWIFTMazeDiagram />
         </div>
+
+        {/* Trust Layer Section */}
+        <div className="mb-12 space-y-8">
+          <h2 className="text-2xl font-bold">{t('trustAndAudit')}</h2>
+
+          {/* Method & Sources */}
+          <MethodAndSources
+            timestamp={new Date().toISOString()}
+            locale={language}
+          />
+
+          {/* Audio Player */}
+          <AudioPlayer />
+
+          {/* FAQ */}
+          <FAQAccordion />
+        </div>
+
+        {/* Institutional Footer */}
+        <InstitutionalFooter />
 
         {/* Footer */}
         <div className="border-t border-border pt-8 text-center text-xs text-muted-foreground">
