@@ -27,11 +27,12 @@ interface SnapshotData {
 const AMOUNT_GBP = 100000;
 
 // Bank model parameters
-const BANK_SPREAD_BPS = 110;      // Execution rate adjustment (basis points)
+const BANK_FX_MARKUP_BPS = 80;      // FX execution adjustment (basis points)
 const BANK_EXPLICIT_FEE_PCT = 0.80; // Explicit transfer fee (%)
+const BANK_IOF_TAX_PCT = 3.50;      // IOF tax on international transfers (%)
 
 // Coins model parameters
-const COINS_NETWORK_FEE_USD = 5.0; // Network cost (USD)
+const COINS_NETWORK_FEE_USD = 5.0;  // Network cost (USD)
 
 export default function Home() {
   const [snapshot, setSnapshot] = useState<SnapshotData | null>(null);
@@ -90,22 +91,27 @@ export default function Home() {
   const gbpbrl_mid = gbpusd_mid * usdbrl_mid; // Derived market reference
 
   // ============================================================================
-  // BANK TRANSFER MODEL
+  // BANK TRANSFER MODEL (LAYERED)
   // ============================================================================
-  // Step 1: Market reference amount (what the market would give)
+  // Step 1: Market reference amount (baseline)
   const bank_market_reference = customAmount * gbpbrl_mid;
 
-  // Step 2: Bank applies execution rate (with spread)
-  const bank_execution_rate = gbpbrl_mid * (1 - BANK_SPREAD_BPS / 10000);
+  // Step 2: Bank applies FX execution adjustment (spread)
+  const bank_execution_rate = gbpbrl_mid * (1 - BANK_FX_MARKUP_BPS / 10000);
   const bank_after_execution = customAmount * bank_execution_rate;
-  const bank_spread_cost = bank_market_reference - bank_after_execution;
+  const bank_fx_adjustment_cost = bank_market_reference - bank_after_execution;
 
   // Step 3: Bank charges explicit fee on the converted amount
   const bank_explicit_fee = bank_after_execution * (BANK_EXPLICIT_FEE_PCT / 100);
-  const bank_final_amount = bank_after_execution - bank_explicit_fee;
+
+  // Step 4: IOF tax (Brazilian tax on international transfers)
+  const bank_iof_tax = bank_after_execution * (BANK_IOF_TAX_PCT / 100);
+
+  // Final amount after all deductions
+  const bank_final_amount = bank_after_execution - bank_explicit_fee - bank_iof_tax;
 
   // Total cost breakdown
-  const bank_total_cost = bank_spread_cost + bank_explicit_fee;
+  const bank_total_cost = bank_fx_adjustment_cost + bank_explicit_fee + bank_iof_tax;
 
   // ============================================================================
   // COINS RAIL MODEL
@@ -172,7 +178,7 @@ export default function Home() {
         <div className="mb-12">
           <h2 className="text-xl font-bold mb-6">Market Reference</h2>
           <p className="text-muted-foreground mb-6">
-            This is the baseline: what you would receive at mid-market rates with no markup or fees.
+            This is the baseline: what you would receive at mid-market rates with no markup, fees, or taxes.
           </p>
 
           <div className="space-y-4">
@@ -193,7 +199,7 @@ export default function Home() {
             </div>
 
             {/* Market reference amount */}
-            <Card className="p-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200">
+            <Card className="p-6 bg-slate-50 dark:bg-slate-950/20 border-slate-200 dark:border-slate-800">
               <div className="flex justify-between items-center">
                 <div>
                   <div className="font-semibold">Market Reference Amount</div>
@@ -223,16 +229,16 @@ export default function Home() {
         <div className="mb-12">
           <h2 className="text-xl font-bold mb-6">Bank Transfer Model</h2>
           <p className="text-muted-foreground mb-6">
-            How a traditional bank structures the transfer. Parameters: {BANK_SPREAD_BPS} bps execution spread + {BANK_EXPLICIT_FEE_PCT}% explicit fee.
+            How a traditional bank structures the transfer. Parameters: {BANK_FX_MARKUP_BPS} bps FX adjustment + {BANK_EXPLICIT_FEE_PCT}% fee + {BANK_IOF_TAX_PCT}% IOF tax.
           </p>
 
           <div className="space-y-4">
-            {/* Step 1: Execution rate */}
-            <Card className="p-6">
+            {/* Step 1: FX execution adjustment */}
+            <Card className="p-6 bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900">
               <div className="mb-4">
-                <div className="text-sm font-semibold text-muted-foreground mb-2">Step 1: Execution Rate</div>
-                <div className="text-xs text-muted-foreground mb-3">
-                  Bank applies {BANK_SPREAD_BPS} bps spread to market rate
+                <div className="text-sm font-semibold text-orange-900 dark:text-orange-100 mb-2">Step 1: FX Execution Adjustment</div>
+                <div className="text-xs text-orange-800 dark:text-orange-200 mb-3">
+                  Bank applies {BANK_FX_MARKUP_BPS} bps spread to market rate
                 </div>
               </div>
               <div className="space-y-2 text-sm">
@@ -241,8 +247,8 @@ export default function Home() {
                   <span className="font-mono">{gbpbrl_mid.toFixed(4)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Spread ({BANK_SPREAD_BPS} bps):</span>
-                  <span className="font-mono">-{(BANK_SPREAD_BPS / 10000).toFixed(4)}</span>
+                  <span>Spread ({BANK_FX_MARKUP_BPS} bps):</span>
+                  <span className="font-mono">-{(BANK_FX_MARKUP_BPS / 10000).toFixed(4)}</span>
                 </div>
                 <div className="border-t pt-2 flex justify-between font-semibold">
                   <span>Execution rate:</span>
@@ -252,24 +258,24 @@ export default function Home() {
             </Card>
 
             {/* Amount after execution */}
-            <Card className="p-6 bg-red-50 dark:bg-red-950/20 border-red-200">
+            <Card className="p-6 bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900">
               <div className="flex justify-between items-center">
                 <div>
                   <div className="font-semibold">After execution rate</div>
                   <div className="text-sm text-muted-foreground">£{customAmount.toLocaleString()} × {bank_execution_rate.toFixed(4)}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-red-600">R${bank_after_execution.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
-                  <div className="text-xs text-red-600">Cost: R${bank_spread_cost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">R${bank_after_execution.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-xs text-orange-600 dark:text-orange-400">Cost: R${bank_fx_adjustment_cost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
                 </div>
               </div>
             </Card>
 
             {/* Step 2: Explicit fee */}
-            <Card className="p-6">
+            <Card className="p-6 bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900">
               <div className="mb-4">
-                <div className="text-sm font-semibold text-muted-foreground mb-2">Step 2: Explicit Fee</div>
-                <div className="text-xs text-muted-foreground mb-3">
+                <div className="text-sm font-semibold text-red-900 dark:text-red-100 mb-2">Step 2: Explicit Bank Fee</div>
+                <div className="text-xs text-red-800 dark:text-red-200 mb-3">
                   {BANK_EXPLICIT_FEE_PCT}% charged on converted amount
                 </div>
               </div>
@@ -278,20 +284,40 @@ export default function Home() {
                   <span>Converted amount:</span>
                   <span className="font-mono">R${bank_after_execution.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between font-semibold">
                   <span>Fee ({BANK_EXPLICIT_FEE_PCT}%):</span>
-                  <span className="font-mono">-R${bank_explicit_fee.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</span>
+                  <span className="font-mono text-red-600 dark:text-red-400">-R${bank_explicit_fee.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Step 3: IOF tax */}
+            <Card className="p-6 bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900">
+              <div className="mb-4">
+                <div className="text-sm font-semibold text-red-900 dark:text-red-100 mb-2">Step 3: IOF Tax (Brazil)</div>
+                <div className="text-xs text-red-800 dark:text-red-200 mb-3">
+                  {BANK_IOF_TAX_PCT}% tax on international transfers
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Taxable amount:</span>
+                  <span className="font-mono">R${bank_after_execution.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span>IOF ({BANK_IOF_TAX_PCT}%):</span>
+                  <span className="font-mono text-red-600 dark:text-red-400">-R${bank_iof_tax.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
             </Card>
 
             {/* Final amount */}
-            <Card className="p-6 bg-red-50 dark:bg-red-950/20 border-red-200">
+            <Card className="p-6 bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900">
               <div className="flex justify-between items-center">
                 <div className="font-semibold">You receive (Bank)</div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-red-600">R${bank_final_amount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
-                  <div className="text-xs text-red-600">Total cost: R${bank_total_cost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">R${bank_final_amount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-xs text-red-600 dark:text-red-400">Total cost: R${bank_total_cost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
                 </div>
               </div>
             </Card>
@@ -300,14 +326,14 @@ export default function Home() {
 
         {/* Coins Rail Model */}
         <div className="mb-12">
-          <h2 className="text-xl font-bold mb-6">Coins Rail Model</h2>
+          <h2 className="text-xl font-bold mb-6">Market-Based Transfer (Alternative)</h2>
           <p className="text-muted-foreground mb-6">
             Uses market reference directly. Only cost: network fee (${COINS_NETWORK_FEE_USD} USD).
           </p>
 
           <div className="space-y-4">
             {/* Market reference */}
-            <Card className="p-6">
+            <Card className="p-6 bg-slate-50 dark:bg-slate-950/20 border-slate-200 dark:border-slate-800">
               <div className="flex justify-between items-center">
                 <div>
                   <div className="font-semibold">Market reference</div>
@@ -320,25 +346,25 @@ export default function Home() {
             </Card>
 
             {/* Network fee */}
-            <Card className="p-6 bg-green-50 dark:bg-green-950/20 border-green-200">
+            <Card className="p-6 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900">
               <div className="flex justify-between items-center">
                 <div>
                   <div className="font-semibold">Network fee</div>
                   <div className="text-sm text-muted-foreground">${COINS_NETWORK_FEE_USD} USD × {usdbrl_mid.toFixed(4)}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-green-600">-R${coins_network_fee.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">-R${coins_network_fee.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
                 </div>
               </div>
             </Card>
 
             {/* Final amount */}
-            <Card className="p-6 bg-purple-50 dark:bg-purple-950/20 border-purple-200">
+            <Card className="p-6 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900">
               <div className="flex justify-between items-center">
-                <div className="font-semibold">You receive (Coins)</div>
+                <div className="font-semibold">You receive (Market-based)</div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-purple-600">R${coins_final_amount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
-                  <div className="text-xs text-purple-600">Total cost: R${coins_network_fee.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">R${coins_final_amount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+                  <div className="text-xs text-green-600 dark:text-green-400">Total cost: R${coins_network_fee.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
                 </div>
               </div>
             </Card>
@@ -349,25 +375,25 @@ export default function Home() {
         <div className="mb-12">
           <h2 className="text-xl font-bold mb-6">Comparison</h2>
 
-          <div className="grid grid-cols-2 gap-6">
-            <Card className="p-6 bg-red-50 dark:bg-red-950/20 border-red-200">
-              <div className="text-sm text-muted-foreground mb-2">Bank</div>
-              <div className="text-2xl font-bold text-red-600 mb-2">R${bank_final_amount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
-              <div className="text-xs text-red-600">Cost: R${bank_total_cost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <Card className="p-6 bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900">
+              <div className="text-sm text-muted-foreground mb-2">Bank Structure</div>
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">R${bank_final_amount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+              <div className="text-xs text-red-600 dark:text-red-400">Total cost: R${bank_total_cost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
             </Card>
 
-            <Card className="p-6 bg-purple-50 dark:bg-purple-950/20 border-purple-200">
-              <div className="text-sm text-muted-foreground mb-2">Coins</div>
-              <div className="text-2xl font-bold text-purple-600 mb-2">R${coins_final_amount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
-              <div className="text-xs text-purple-600">Cost: R${coins_network_fee.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+            <Card className="p-6 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900">
+              <div className="text-sm text-muted-foreground mb-2">Market-Based Structure</div>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">R${coins_final_amount.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+              <div className="text-xs text-green-600 dark:text-green-400">Total cost: R${coins_network_fee.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
             </Card>
           </div>
 
-          <Card className="p-6 mt-6 bg-green-50 dark:bg-green-950/20 border-green-200">
+          <Card className="p-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
             <div className="text-center">
               <div className="text-sm text-muted-foreground mb-2">Difference</div>
-              <div className="text-3xl font-bold text-green-600 mb-1">+R${difference.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
-              <div className="text-sm text-green-600">{difference_pct.toFixed(2)}% of market reference</div>
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">+R${difference.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</div>
+              <div className="text-sm text-blue-600 dark:text-blue-400">{difference_pct.toFixed(2)}% of market reference</div>
             </div>
           </Card>
         </div>
@@ -375,10 +401,11 @@ export default function Home() {
         {/* Footnote */}
         <div className="p-6 bg-slate-50 dark:bg-slate-950/20 rounded border border-slate-200 dark:border-slate-800">
           <div className="text-xs text-muted-foreground space-y-2">
-            <p><strong>Bank parameters:</strong> Execution spread {BANK_SPREAD_BPS} bps + explicit fee {BANK_EXPLICIT_FEE_PCT}%</p>
-            <p><strong>Coins parameters:</strong> Network fee ${COINS_NETWORK_FEE_USD} USD</p>
+            <p><strong>Bank model parameters:</strong> FX adjustment {BANK_FX_MARKUP_BPS} bps + fee {BANK_EXPLICIT_FEE_PCT}% + IOF {BANK_IOF_TAX_PCT}%</p>
+            <p><strong>Market-based model:</strong> Network fee ${COINS_NETWORK_FEE_USD} USD</p>
             <p><strong>Market reference:</strong> GBPUSD (Binance) × USDBRL (ValorPro) = GBPBRL (derived)</p>
             <p><strong>Prices refreshed:</strong> {new Date(snapshot.timestamp).toLocaleString()}</p>
+            <p><strong>Note:</strong> This page models transfer structures. It does not represent any specific bank's actual pricing.</p>
           </div>
         </div>
       </div>
