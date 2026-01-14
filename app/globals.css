@@ -1,0 +1,607 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant light (&:is(.light *));
+
+:root {
+  /* === DARK MODE (DEFAULT) — CLASSIC METAL SYSTEM === */
+  /* Material Philosophy: Steel = structure, Silver = information, Gold = verdict */
+
+  --background: oklch(0.06 0.008 250);
+  --foreground: oklch(0.92 0.006 240);
+
+  /* Card surfaces - subtle depth, cool steel temperature */
+  --card: oklch(0.09 0.008 250);
+  --card-foreground: oklch(0.92 0.006 240);
+  --popover: oklch(0.08 0.008 250);
+  --popover-foreground: oklch(0.92 0.006 240);
+
+  /* Primary is now silver - the informational backbone */
+  --primary: oklch(0.75 0.012 250);
+  --primary-foreground: oklch(0.06 0.008 250);
+
+  /* Secondary surfaces */
+  --secondary: oklch(0.12 0.006 250);
+  --secondary-foreground: oklch(0.85 0.006 240);
+
+  /* Muted - for subtle text and backgrounds */
+  --muted: oklch(0.15 0.006 250);
+  --muted-foreground: oklch(0.55 0.006 250);
+
+  /* Accent is now steel - reserved for structural highlights */
+  --accent: oklch(0.55 0.04 250);
+  --accent-foreground: oklch(0.06 0.008 250);
+
+  --destructive: oklch(0.55 0.22 20);
+  --destructive-foreground: oklch(0.95 0 0);
+
+  /* Borders - steel hierarchy (3 intensities) */
+  --border: oklch(0.25 0.012 250);
+  --border-strong: oklch(0.35 0.015 250);
+  --border-subtle: oklch(0.18 0.008 250);
+
+  --input: oklch(0.11 0.006 250);
+  --ring: oklch(0.55 0.04 250);
+
+  /* === STEEL SYSTEM (structural backbone) === */
+  --steel-100: oklch(0.88 0.008 250);
+  --steel-200: oklch(0.75 0.012 250);
+  --steel-300: oklch(0.6 0.015 250);
+  --steel-400: oklch(0.48 0.012 250);
+  --steel-500: oklch(0.38 0.01 250);
+  --steel-600: oklch(0.28 0.008 250);
+  --steel-700: oklch(0.2 0.006 250);
+
+  /* === SILVER SYSTEM (information & data) === */
+  --silver-100: oklch(0.95 0.004 240);
+  --silver-200: oklch(0.88 0.006 240);
+  --silver-300: oklch(0.78 0.008 240);
+  --silver-400: oklch(0.65 0.008 240);
+  --silver-500: oklch(0.52 0.006 240);
+
+  /* === GOLD SYSTEM (verdict only - <5% of screen) === */
+  --gold-100: oklch(0.92 0.08 85);
+  --gold-200: oklch(0.85 0.12 82);
+  --gold-300: oklch(0.78 0.14 80);
+  --gold-400: oklch(0.72 0.15 78);
+  --gold-500: oklch(0.65 0.14 75);
+
+  /* Semantic: Gold replaces green for positive verdict */
+  --success: oklch(0.78 0.14 80);
+  --success-foreground: oklch(0.15 0.02 80);
+  --success-muted: oklch(0.78 0.14 80 / 0.12);
+
+  /* === WARNING/CAUTION (amber, for IOF/taxes) === */
+  --warning: oklch(0.72 0.16 55);
+  --warning-foreground: oklch(0.12 0.02 55);
+
+  /* === GLASS & DEPTH (steel-tinted) === */
+  --glass: oklch(0.1 0.008 250 / 0.75);
+  --glass-border: oklch(0.35 0.012 250 / 0.4);
+  --glass-strong: oklch(0.12 0.008 250 / 0.88);
+
+  /* Subtle steel glow */
+  --steel-glow: oklch(0.6 0.04 250 / 0.06);
+  --steel-glow-strong: oklch(0.6 0.04 250 / 0.12);
+
+  /* === CHART COLORS (metal palette) === */
+  /* chart-1: Spread (steel) */
+  --chart-1: oklch(0.48 0.03 250);
+  /* chart-2: Fees (silver) */
+  --chart-2: oklch(0.6 0.025 240);
+  /* chart-3: IOF (amber/warning) */
+  --chart-3: oklch(0.72 0.16 55);
+  /* chart-4: reserved (muted steel) */
+  --chart-4: oklch(0.55 0.02 250);
+  /* chart-5: reserved */
+  --chart-5: oklch(0.5 0.02 250);
+
+  --radius: 0.375rem;
+
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--accent-foreground);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--secondary-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+/* === LIGHT MODE — PAPER + INK + FOIL === */
+.light {
+  --background: oklch(0.97 0.003 250);
+  --foreground: oklch(0.15 0.008 250);
+
+  /* Card surfaces - paper-white */
+  --card: oklch(0.995 0.002 250);
+  --card-foreground: oklch(0.15 0.008 250);
+  --popover: oklch(0.995 0.002 250);
+  --popover-foreground: oklch(0.15 0.008 250);
+
+  /* Primary - dark steel for contrast */
+  --primary: oklch(0.35 0.012 250);
+  --primary-foreground: oklch(0.97 0.003 250);
+
+  /* Secondary surfaces */
+  --secondary: oklch(0.94 0.004 250);
+  --secondary-foreground: oklch(0.25 0.008 250);
+
+  /* Muted */
+  --muted: oklch(0.92 0.004 250);
+  --muted-foreground: oklch(0.45 0.006 250);
+
+  /* Accent - steel */
+  --accent: oklch(0.45 0.06 250);
+  --accent-foreground: oklch(0.97 0.003 250);
+
+  --destructive: oklch(0.5 0.22 20);
+  --destructive-foreground: oklch(0.97 0 0);
+
+  /* Borders - steel strokes */
+  --border: oklch(0.82 0.008 250);
+  --border-strong: oklch(0.7 0.012 250);
+  --border-subtle: oklch(0.88 0.006 250);
+
+  --input: oklch(0.94 0.004 250);
+  --ring: oklch(0.45 0.06 250);
+
+  /* === LIGHT STEEL SYSTEM (inverted) === */
+  --steel-100: oklch(0.2 0.006 250);
+  --steel-200: oklch(0.3 0.008 250);
+  --steel-300: oklch(0.4 0.01 250);
+  --steel-400: oklch(0.5 0.012 250);
+  --steel-500: oklch(0.6 0.01 250);
+  --steel-600: oklch(0.72 0.008 250);
+  --steel-700: oklch(0.84 0.006 250);
+
+  /* === LIGHT SILVER SYSTEM === */
+  --silver-100: oklch(0.2 0.004 240);
+  --silver-200: oklch(0.32 0.006 240);
+  --silver-300: oklch(0.45 0.008 240);
+  --silver-400: oklch(0.55 0.008 240);
+  --silver-500: oklch(0.68 0.006 240);
+
+  /* === LIGHT GOLD SYSTEM === */
+  --gold-100: oklch(0.35 0.08 80);
+  --gold-200: oklch(0.45 0.12 78);
+  --gold-300: oklch(0.55 0.14 76);
+  --gold-400: oklch(0.62 0.15 75);
+  --gold-500: oklch(0.7 0.14 74);
+
+  /* Semantic: Gold for positive verdict */
+  --success: oklch(0.55 0.14 76);
+  --success-foreground: oklch(0.97 0.01 76);
+  --success-muted: oklch(0.55 0.14 76 / 0.1);
+
+  /* Warning */
+  --warning: oklch(0.55 0.18 55);
+  --warning-foreground: oklch(0.97 0.02 55);
+
+  /* Glass & Depth (light) */
+  --glass: oklch(1 0 0 / 0.85);
+  --glass-border: oklch(0.7 0.01 250 / 0.5);
+  --glass-strong: oklch(0.98 0.003 250 / 0.92);
+
+  --steel-glow: oklch(0.5 0.04 250 / 0.04);
+  --steel-glow-strong: oklch(0.5 0.04 250 / 0.08);
+
+  /* Chart colors (light) */
+  --chart-1: oklch(0.4 0.04 250);
+  --chart-2: oklch(0.5 0.03 240);
+  --chart-3: oklch(0.55 0.18 55);
+  --chart-4: oklch(0.45 0.02 250);
+  --chart-5: oklch(0.4 0.02 250);
+}
+
+@theme inline {
+  --font-sans: "Inter", "Inter Fallback", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Geist Mono", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  /* Steel scale */
+  --color-steel-100: var(--steel-100);
+  --color-steel-200: var(--steel-200);
+  --color-steel-300: var(--steel-300);
+  --color-steel-400: var(--steel-400);
+  --color-steel-500: var(--steel-500);
+  --color-steel-600: var(--steel-600);
+  --color-steel-700: var(--steel-700);
+  /* Silver scale */
+  --color-silver-100: var(--silver-100);
+  --color-silver-200: var(--silver-200);
+  --color-silver-300: var(--silver-300);
+  --color-silver-400: var(--silver-400);
+  --color-silver-500: var(--silver-500);
+  /* Gold scale */
+  --color-gold-100: var(--gold-100);
+  --color-gold-200: var(--gold-200);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* === TYPOGRAPHY UTILITIES === */
+
+.eyebrow-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  /* Silver for labels */
+  color: var(--silver-400);
+}
+
+.hero-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  /* Silver-100 for hero title (high legibility) */
+  color: var(--silver-100);
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  /* Silver-400 for subtitle (muted) */
+  color: var(--silver-400);
+  line-height: 1.6;
+  max-width: 32rem;
+}
+
+.trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  /* Silver for trust row */
+  color: var(--silver-500);
+}
+
+/* === CTA BUTTONS — STEEL SURFACE === */
+
+.cta-primary {
+  /* Steel surface, no green */
+  background: linear-gradient(135deg, var(--steel-400) 0%, var(--steel-500) 50%, var(--steel-600) 100%);
+  border: 1px solid var(--steel-400);
+  /* Silver text */
+  color: var(--silver-100);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.625rem 1.5rem;
+  border-radius: var(--radius);
+  transition: all 0.15s ease;
+}
+
+.cta-primary:hover {
+  background: linear-gradient(135deg, var(--steel-300) 0%, var(--steel-400) 50%, var(--steel-500) 100%);
+}
+
+.light .cta-primary {
+  color: var(--silver-100);
+}
+
+.cta-secondary {
+  background: transparent;
+  border: 1px solid transparent;
+  /* Silver text for secondary */
+  color: var(--silver-400);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.625rem 1.5rem;
+  border-radius: var(--radius);
+  transition: all 0.15s ease;
+}
+
+.cta-secondary:hover {
+  color: var(--silver-200);
+  border-color: var(--steel-600);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.light .cta-secondary:hover {
+  border-color: var(--steel-500);
+}
+
+/* === GLASS CARDS — STEEL FRAMED === */
+
+.glass-card {
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(1.15);
+  /* Steel border */
+  border: 1px solid var(--steel-600);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.03), inset 0 -1px 0 oklch(0 0 0 / 0.08), 0 0 40px var(--steel-glow);
+}
+
+.light .glass-card {
+  box-shadow: 0 1px 3px oklch(0 0 0 / 0.06), 0 4px 12px oklch(0 0 0 / 0.04);
+}
+
+.glass-card-strong {
+  background: var(--glass-strong);
+  backdrop-filter: blur(28px) saturate(1.2);
+  border: 1px solid var(--steel-500);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.04), inset 0 -1px 0 oklch(0 0 0 / 0.12), 0 4px 24px oklch(0 0 0 / 0.25), 0 0
+    60px var(--steel-glow-strong);
+}
+
+.light .glass-card-strong {
+  box-shadow: 0 2px 8px oklch(0 0 0 / 0.08), 0 8px 24px oklch(0 0 0 / 0.06);
+}
+
+/* === TERMINAL MODULE — STEEL FRAME === */
+
+.terminal-module {
+  background: var(--card);
+  /* Steel border */
+  border: 1px solid var(--steel-600);
+}
+
+.light .terminal-module {
+  border-color: var(--border);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.04);
+}
+
+/* === STEEL SYSTEM === */
+
+.steel-text {
+  color: var(--steel-300);
+}
+
+.steel-border {
+  border-color: var(--steel-500);
+}
+
+.steel-border-strong {
+  border-color: var(--steel-400);
+}
+
+.steel-border-subtle {
+  border-color: var(--steel-700);
+}
+
+.steel-surface {
+  background: linear-gradient(145deg, var(--steel-700) 0%, var(--steel-600) 50%, var(--steel-700) 100%);
+  border: 1px solid var(--steel-500);
+}
+
+.steel-stroke {
+  background: linear-gradient(135deg, var(--steel-400) 0%, var(--steel-500) 50%, var(--steel-600) 100%);
+  border: 1px solid var(--steel-400);
+  color: var(--silver-100);
+}
+
+.steel-stroke:hover {
+  background: linear-gradient(135deg, var(--steel-300) 0%, var(--steel-400) 50%, var(--steel-500) 100%);
+}
+
+.light .steel-stroke {
+  color: var(--silver-100);
+}
+
+/* === SILVER TEXT SYSTEM === */
+
+.silver-text {
+  color: var(--silver-200);
+}
+
+.silver-text-muted {
+  color: var(--silver-400);
+}
+
+.silver-text-subtle {
+  color: var(--silver-500);
+}
+
+/* === GOLD SYSTEM (verdict only) === */
+
+.gold-text {
+  color: var(--gold-300);
+}
+
+.gold-badge {
+  /* Gold badge - subtle, not background-heavy */
+  background: var(--gold-500) / 0.1;
+  color: var(--gold-300);
+  border: 1px solid var(--gold-400) / 0.3;
+}
+
+.gold-check {
+  color: var(--gold-300);
+}
+
+/* === STEEL DIVIDER === */
+.steel-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--steel-600) 20%,
+    var(--steel-400) 50%,
+    var(--steel-600) 80%,
+    transparent 100%
+  );
+}
+
+.light .steel-divider {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border) 20%,
+    var(--border-strong) 50%,
+    var(--border) 80%,
+    transparent 100%
+  );
+}
+
+/* Backward compat alias */
+.metallic-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--steel-600) 20%,
+    var(--steel-400) 50%,
+    var(--steel-600) 80%,
+    transparent 100%
+  );
+}
+
+.light .metallic-divider {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border) 20%,
+    var(--border-strong) 50%,
+    var(--border) 80%,
+    transparent 100%
+  );
+}
+
+/* === STATUS INDICATOR — STEEL (not green) === */
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: pulse-subtle 2.5s ease-in-out infinite;
+}
+
+.status-indicator.live {
+  /* Steel indicator, not green */
+  background: var(--steel-300);
+  box-shadow: 0 0 8px var(--steel-400);
+}
+
+.light .status-indicator.live {
+  background: var(--steel-400);
+  box-shadow: 0 0 4px var(--steel-500);
+}
+
+@keyframes pulse-subtle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+/* === DIVIDERS === */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--steel-600) 20%,
+    var(--steel-400) 50%,
+    var(--steel-600) 80%,
+    transparent 100%
+  );
+}
+
+.light .section-divider {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border) 20%,
+    var(--border-strong) 50%,
+    var(--border) 80%,
+    transparent 100%
+  );
+}
+
+/* === DATA CELLS — SILVER === */
+.data-cell {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  /* Silver for data */
+  color: var(--silver-200);
+}
+
+/* === SUBTLE TEXTURES === */
+.noise-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.012;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.light .noise-overlay::before {
+  opacity: 0.008;
+}
+
+/* Steel glow */
+.steel-glow {
+  box-shadow: 0 0 60px var(--steel-glow);
+}
+
+.light .steel-glow {
+  box-shadow: 0 4px 20px oklch(0 0 0 / 0.04);
+}
+
+/* Backward compat */
+.ice-glow {
+  box-shadow: 0 0 60px var(--steel-glow);
+}
+
+.light .ice-glow {
+  box-shadow: 0 4px 20px oklch(0 0 0 / 0.04);
+}

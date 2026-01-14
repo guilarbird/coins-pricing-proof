@@ -1,0 +1,184 @@
+{
+  "common": {
+    "learnMore": "Ver metodologia",
+    "simulateNow": "Ver meu spread real",
+    "showDetails": "Mostrar etapas de cálculo",
+    "hideDetails": "Ocultar etapas de cálculo",
+    "bestProvider": "Melhor execução",
+    "difference": "Diferença vs Melhor Provedor",
+    "savings": "Diferencial",
+    "youSend": "Você envia",
+    "youReceive": "Você recebe",
+    "updated": "Atualizado",
+    "allCostsShown": "Todos os custos discriminados",
+    "sourcesLinked": "Fontes de dados vinculadas",
+    "viewSources": "Ver fontes",
+    "vs": "vs",
+    "executionSummary": "Resumo de Execução"
+  },
+  "hero": {
+    "title": "FX Digital",
+    "subtitle": "Precificação baseada em mercado, liquidação on-chain, desembolsos offshore e contas virtuais em BRL para entidades e pessoas físicas."
+  },
+  "marketReference": {
+    "title": "Taxas de Referência de Mercado",
+    "subtitle": "Taxas FX derivadas de fontes de liquidez institucional, atualizadas em tempo real",
+    "header": "Dados de Mercado",
+    "mid": "Médio",
+    "bid": "Compra",
+    "ask": "Venda",
+    "spread": "Spread",
+    "gbpUsd": {
+      "title": "GBP/USD",
+      "description": "FX Interbancário (GBP)",
+      "railExplainer": "Taxa de referência FX interbancário para formação de preços cross-currency."
+    },
+    "usdBrl": {
+      "title": "USD/BRL",
+      "description": "Liquidação Local (BRL)",
+      "railExplainer": "Taxa FX via parceiros de liquidação local para fluxos bancários tradicionais."
+    },
+    "usdtBrl": {
+      "title": "USDT/BRL",
+      "description": "Trilho de Liquidação On-Chain",
+      "footer": "USDT é uma stablecoin referenciada ao dólar usada como camada de liquidação on-chain, reduzindo dependências intermediárias.",
+      "railExplainer": "Taxa de liquidação FX on-chain — reduz fricção de banco correspondente."
+    },
+    "railBadge": {
+      "bankFx": "FX Interbancário",
+      "localSettlement": "Liquidação Local",
+      "stablecoinRail": "Trilho On-Chain"
+    }
+  },
+  "simulator": {
+    "title": "Comparação de Custo de Execução",
+    "subtitle": "Compare o custo total de execução FX entre métodos de liquidação",
+    "header": "Painel de Execução",
+    "tradeParams": "Parâmetros da Operação",
+    "inputLabel": "Valor a enviar",
+    "outputLabel": "Valor recebido",
+    "fxSpread": "Spread FX",
+    "explicitFees": "Taxas Explícitas",
+    "iof": "IOF",
+    "settlementLayers": "Camadas de Liquidação",
+    "totalCost": "Custo Total",
+    "iofNote": "IOF depende da estrutura (não fixo)",
+    "iofStandard": "Padrão (3,5%)",
+    "iofOptimized": "Otimizado (variável)",
+    "iofVariable": "Variável por estrutura",
+    "iofToggleLabel": "Comparação de Regime IOF",
+    "iofToggleDescription": "Alterne para comparar cenários de IOF",
+    "costStack": "Pilha de Custos",
+    "coinsIofNote": "Taxa IOF depende da estrutura e finalidade da transação",
+    "coinsIofVariable": "IOF varia conforme a estrutura",
+    "costLegend": {
+      "spread": "Spread",
+      "fees": "Taxas",
+      "iof": "IOF"
+    },
+    "bestForScenario": "Melhor execução para este cenário",
+    "lowestCost": "Menor custo total para este cenário"
+  },
+  "providers": {
+    "bank": "BTG Pactual",
+    "wise": "Wise",
+    "coins": "Coins.xyz"
+  },
+  "diagrams": {
+    "costLayers": {
+      "title": "Estrutura de Custos por Provedor",
+      "subtitle": "Detalhamento de spread FX, taxas e impostos aplicáveis por método de liquidação",
+      "headerLabel": "Análise de Custos",
+      "legend": {
+        "fxSpread": "Spread FX",
+        "fees": "Taxas",
+        "iof": "IOF"
+      },
+      "header": "Detalhamento de Custo por Provedor (bps)"
+    },
+    "swiftMaze": {
+      "title": "Comparação de Fluxo de Liquidação",
+      "subtitle": "Correspondente bancário tradicional versus liquidação FX on-chain",
+      "headerLabel": "Fluxo de Liquidação",
+      "traditional": "Rota Tradicional",
+      "direct": "Rota Direta",
+      "correspondentBank": "Banco Correspondente",
+      "localBank": "Banco Local",
+      "sender": "Remetente",
+      "receiver": "Destinatário",
+      "market": "Mesa FX",
+      "otcDesk": "Mesa OTC",
+      "otcSpread": "~1,1% spread",
+      "onDemand": "Conversão sob demanda",
+      "stablecoin": "Trilho On-Chain",
+      "layerCount": "camadas",
+      "nostroVostro": "Nostro/Vostro",
+      "fxMarkup": "Markup FX",
+      "onRamp": "GBP → USDT"
+    },
+    "bidAsk": {
+      "title": "Compra / Venda / Spread",
+      "subtitle": "Como a precificação FX é formada a partir de liquidez de mercado",
+      "headerLabel": "Mecânica de Preços",
+      "bidLabel": "Compra",
+      "askLabel": "Venda",
+      "midLabel": "Médio",
+      "spreadLabel": "Spread",
+      "explanation": "O spread é a diferença entre preços de compra e venda. Coins.xyz aplica spreads típicos de 5–15 bps dependendo do tamanho e condições de mercado.",
+      "header": "Visualização de Spread USD/BRL"
+    }
+  },
+  "method": {
+    "title": "Metodologia & Fontes de Dados",
+    "subtitle": "Total transparência na formação de preços FX e lógica de cálculo",
+    "calculationSteps": "Etapas de Cálculo",
+    "dataSources": "Fontes de Dados",
+    "steps": {
+      "step1": "Obter taxa mid-market GBP/USD de feed FX institucional",
+      "step2": "Obter taxa USD/BRL de referência de mercado local",
+      "step3": "Obter taxa USDT/BRL de profundidade de livro de ordens on-chain",
+      "step4": "Calcular taxa cruzada GBP/BRL para cada trilho de liquidação",
+      "step5": "Aplicar spread FX específico do provedor (Coins.xyz: 5–15 bps típico)",
+      "step6": "Adicionar taxas explícitas (fixas + percentuais quando aplicável)",
+      "step7": "Aplicar IOF conforme estrutura da transação (estatutário onde exigido)",
+      "step8": "Calcular valores finais de saída para comparação"
+    },
+    "wiseMid": "Referência FX institucional (mid-market)",
+    "binanceUsdt": "Profundidade de mercado on-chain (USDT/BRL)",
+    "coinsOrderBook": "Mesa Digital FX Coins.xyz / execução RFQ",
+    "disclaimer": "Modelo ilustrativo para fins de comparação. Cotações finais estão sujeitas à execução, condições de mercado e estrutura da transação. Isto não é uma oferta firme."
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "q1": {
+      "question": "Por que o IOF varia?",
+      "answer": "O IOF (Imposto sobre Operações Financeiras) é um imposto estatutário brasileiro que varia conforme a estrutura e finalidade da transação. As alíquotas variam de 0,38% a 6,38%. Para transferências ao Brasil, o IOF é aplicado transparentemente onde legalmente exigido (ex: 3,5% para certos tipos de remessa)."
+    },
+    "q2": {
+      "question": "Como a precificação FX é determinada?",
+      "answer": "A precificação da Coins.xyz é baseada em mercado, derivada de livros de ordens e provedores de liquidez institucional. Spreads FX típicos variam de 5–15 bps dependendo do tamanho da transação e condições de mercado. O spread é sempre mostrado explicitamente — sem markups ocultos."
+    },
+    "q3": {
+      "question": "Como funciona a execução?",
+      "answer": "Coins.xyz opera um modelo de execução Digital FX. Você solicita uma cotação (RFQ), a precificação é formada a partir de liquidez em tempo real, a operação é executada e a liquidação ocorre via trilhos on-chain. Isso reduz camadas intermediárias comparado ao banco correspondente."
+    },
+    "q4": {
+      "question": "O que é liquidação on-chain?",
+      "answer": "Liquidação on-chain usa ativos digitais como camada final de execução para FX internacional. Em vez de depender de redes de banco correspondente (contas Nostro/Vostro), a liquidação ocorre diretamente on-chain — reduzindo opacidade operacional e custos estruturais."
+    }
+  },
+  "audio": {
+    "title": "Visão Geral em Áudio",
+    "subtitle": "Explicador de 60-90s",
+    "kidMode": "Explicação simplificada",
+    "normalMode": "Explicação padrão"
+  },
+  "footer": {
+    "tradeDesk": "FX Digital",
+    "legal": "Legal",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço",
+    "disclaimer": "Aviso de Risco",
+    "copyright": "© 2026 Coins.xyz. Todos os direitos reservados. Infraestrutura regulada de ativos digitais e pagamentos."
+  }
+}

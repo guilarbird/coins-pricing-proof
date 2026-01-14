@@ -1,0 +1,184 @@
+{
+  "common": {
+    "learnMore": "View methodology",
+    "simulateNow": "Reveal your FX spread",
+    "showDetails": "Show calculation steps",
+    "hideDetails": "Hide calculation steps",
+    "bestProvider": "Best execution",
+    "difference": "Difference vs Best Provider",
+    "savings": "Differential",
+    "youSend": "You send",
+    "youReceive": "You receive",
+    "updated": "Updated",
+    "allCostsShown": "All costs itemized",
+    "sourcesLinked": "Data sources linked",
+    "viewSources": "View sources",
+    "vs": "vs",
+    "executionSummary": "Execution Summary"
+  },
+  "hero": {
+    "title": "Digital FX",
+    "subtitle": "Market-based pricing, on-chain settlement, offshore disbursements, and virtual BRL accounts for entities and individuals."
+  },
+  "marketReference": {
+    "title": "Market Reference Rates",
+    "subtitle": "FX rates derived from institutional liquidity sources, updated in real time",
+    "header": "Market Data",
+    "mid": "Mid",
+    "bid": "Bid",
+    "ask": "Ask",
+    "spread": "Spread",
+    "gbpUsd": {
+      "title": "GBP/USD",
+      "description": "Interbank FX (GBP)",
+      "railExplainer": "Interbank FX reference rate for cross-currency pricing formation."
+    },
+    "usdBrl": {
+      "title": "USD/BRL",
+      "description": "Local Settlement (BRL)",
+      "railExplainer": "FX rate via local settlement partners for traditional banking flows."
+    },
+    "usdtBrl": {
+      "title": "USDT/BRL",
+      "description": "On-Chain Settlement Rail",
+      "footer": "USDT is a dollar-referenced stablecoin used as the on-chain settlement layer, reducing intermediary dependencies.",
+      "railExplainer": "On-chain FX settlement rate — reduces correspondent banking friction."
+    },
+    "railBadge": {
+      "bankFx": "Interbank FX",
+      "localSettlement": "Local Settlement",
+      "stablecoinRail": "On-Chain Rail"
+    }
+  },
+  "simulator": {
+    "title": "Execution Cost Comparison",
+    "subtitle": "Compare total cost of FX execution across settlement methods",
+    "header": "Execution Panel",
+    "tradeParams": "Trade Parameters",
+    "inputLabel": "Amount to send",
+    "outputLabel": "Amount received",
+    "fxSpread": "FX Spread",
+    "explicitFees": "Explicit Fees",
+    "iof": "IOF",
+    "settlementLayers": "Settlement Layers",
+    "totalCost": "Total Cost",
+    "iofNote": "IOF is structure-dependent (not fixed)",
+    "iofStandard": "Standard (3.5%)",
+    "iofOptimized": "Optimized (varies)",
+    "iofVariable": "Variable by structure",
+    "iofToggleLabel": "IOF Regime Comparison",
+    "iofToggleDescription": "Toggle to compare IOF scenarios",
+    "costStack": "Cost Stack",
+    "coinsIofNote": "IOF rate depends on transaction structure and purpose",
+    "coinsIofVariable": "IOF varies based on structure",
+    "costLegend": {
+      "spread": "Spread",
+      "fees": "Fees",
+      "iof": "IOF"
+    },
+    "bestForScenario": "Best execution for this scenario",
+    "lowestCost": "Lowest total cost for this scenario"
+  },
+  "providers": {
+    "bank": "BTG Pactual",
+    "wise": "Wise",
+    "coins": "Coins.xyz"
+  },
+  "diagrams": {
+    "costLayers": {
+      "title": "Cost Structure by Provider",
+      "subtitle": "Itemized breakdown of FX spread, fees, and applicable taxes by settlement method",
+      "headerLabel": "Cost Analysis",
+      "legend": {
+        "fxSpread": "FX Spread",
+        "fees": "Fees",
+        "iof": "IOF"
+      },
+      "header": "Cost Breakdown by Provider (bps)"
+    },
+    "swiftMaze": {
+      "title": "Settlement Flow Comparison",
+      "subtitle": "Traditional correspondent banking versus on-chain FX settlement",
+      "headerLabel": "Settlement Flow",
+      "traditional": "Traditional Route",
+      "direct": "Direct Route",
+      "correspondentBank": "Correspondent Bank",
+      "localBank": "Local Bank",
+      "sender": "Sender",
+      "receiver": "Receiver",
+      "market": "FX Desk",
+      "otcDesk": "OTC Trade Desk",
+      "otcSpread": "~1.1% spread",
+      "onDemand": "On-demand conversion",
+      "stablecoin": "On-Chain Rail",
+      "layerCount": "layers",
+      "nostroVostro": "Nostro/Vostro",
+      "fxMarkup": "FX Markup",
+      "onRamp": "GBP → USDT"
+    },
+    "bidAsk": {
+      "title": "Bid / Ask / Spread",
+      "subtitle": "How FX pricing is formed from market liquidity",
+      "headerLabel": "Pricing Mechanics",
+      "bidLabel": "Bid (Buy)",
+      "askLabel": "Ask (Sell)",
+      "midLabel": "Mid",
+      "spreadLabel": "Spread",
+      "explanation": "The spread is the difference between bid and ask prices. Coins.xyz applies typical spreads of 5–15 bps depending on size and market conditions.",
+      "header": "USD/BRL Spread Visualization"
+    }
+  },
+  "method": {
+    "title": "Methodology & Data Sources",
+    "subtitle": "Full transparency on FX pricing formation and calculation logic",
+    "calculationSteps": "Calculation Steps",
+    "dataSources": "Data Sources",
+    "steps": {
+      "step1": "Retrieve mid-market GBP/USD rate from institutional FX feed",
+      "step2": "Retrieve USD/BRL rate from local market reference",
+      "step3": "Retrieve USDT/BRL rate from on-chain order book depth",
+      "step4": "Calculate cross-rate GBP/BRL for each settlement rail",
+      "step5": "Apply provider-specific FX spread (Coins.xyz: 5–15 bps typical)",
+      "step6": "Add explicit fees (flat + percentage where applicable)",
+      "step7": "Apply IOF based on transaction structure (statutory where required)",
+      "step8": "Calculate final output amounts for comparison"
+    },
+    "wiseMid": "Institutional FX reference (mid-market)",
+    "binanceUsdt": "On-chain market depth (USDT/BRL)",
+    "coinsOrderBook": "Coins.xyz Digital FX desk / RFQ execution",
+    "disclaimer": "Illustrative model for comparison purposes. Final quotes are subject to execution, market conditions, and transaction structure. This is not a firm offer."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": {
+      "question": "Why does IOF vary?",
+      "answer": "IOF (Tax on Financial Operations) is a Brazilian statutory tax that varies based on transaction structure and purpose. Rates range from 0.38% to 6.38%. For Brazil-bound transfers, IOF is applied transparently where legally required (e.g., 3.5% for certain remittance types)."
+    },
+    "q2": {
+      "question": "How is FX pricing determined?",
+      "answer": "Coins.xyz pricing is market-based, derived from live order books and institutional liquidity providers. Typical FX spreads range from 5–15 bps depending on transaction size and market conditions. Spread is always shown explicitly — no hidden markups."
+    },
+    "q3": {
+      "question": "How does execution work?",
+      "answer": "Coins.xyz operates a Digital FX execution model. You request a quote (RFQ), pricing is formed from live liquidity, the trade is executed, and settlement occurs via on-chain rails. This reduces intermediary layers compared to correspondent banking."
+    },
+    "q4": {
+      "question": "What is on-chain settlement?",
+      "answer": "On-chain settlement uses digital assets as the final execution layer for cross-border FX. Rather than relying on correspondent banking networks (Nostro/Vostro accounts), settlement occurs directly on-chain — reducing operational opacity and structural costs."
+    }
+  },
+  "audio": {
+    "title": "Audio Overview",
+    "subtitle": "60-90s explainer",
+    "kidMode": "Simplified explanation",
+    "normalMode": "Standard explanation"
+  },
+  "footer": {
+    "tradeDesk": "Digital FX",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "disclaimer": "Risk Disclaimer",
+    "copyright": "© 2026 Coins.xyz. All rights reserved. Regulated digital assets and payments infrastructure."
+  }
+}
