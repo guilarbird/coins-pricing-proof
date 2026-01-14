@@ -179,6 +179,32 @@ Estes podem ser ajustados na interface para diferentes cenários.
 
 ---
 
+## Feature Flags
+
+### VITE_USE_V0_UI
+
+Permite alternar entre a UI atual e a UI v0 importada.
+
+**Default:** `false` (renderiza UI atual)
+
+**Como ativar:**
+
+```bash
+# Local (dev)
+VITE_USE_V0_UI=true pnpm dev
+
+# Vercel Preview
+# Adicione a env var VITE_USE_V0_UI=true nas configurações do Preview
+```
+
+**Comportamento:**
+- Se `VITE_USE_V0_UI=true`: Home renderiza V0Preview (UI v0 completa)
+- Se `VITE_USE_V0_UI=false` ou não definida: Home renderiza UI atual (pricing calculator)
+
+**Nota:** A pasta `v0_full/` contém todo o código v0 importado de forma isolada. Não afeta a build se a flag não estiver ativada.
+
+---
+
 ## Como Executar
 
 ### Backend

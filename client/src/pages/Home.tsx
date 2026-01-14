@@ -6,7 +6,24 @@ import { CostLayersDiagram } from '@/components/CostLayersDiagram';
 import { SWIFTMazeDiagram } from '@/components/SWIFTMazeDiagram';
 import { BidAskSpreadDiagram } from '@/components/BidAskSpreadDiagram';
 
+/**
+ * Feature Flag: VITE_USE_V0_UI
+ * When set to 'true', this will render the v0 UI instead of the current UI.
+ * To enable in Vercel Preview:
+ * - Set env var: VITE_USE_V0_UI=true
+ * - Redeploy preview
+ * 
+ * Default: false (renders current UI)
+ */
+const USE_V0_UI = import.meta.env.VITE_USE_V0_UI === 'true';
+
 export default function Home() {
+  // Feature flag check - when v0_full is merged, this will render V0Preview
+  // For now, always render current UI
+  if (USE_V0_UI && false) {
+    // TODO: Import V0Preview from v0_full after PR #10 is merged
+    // return <V0Preview />;
+  }
   const { t, language } = useTranslations();
   const { setLanguage } = useContext(LanguageContext);
 
