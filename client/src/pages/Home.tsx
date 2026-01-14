@@ -132,7 +132,7 @@ export default function Home() {
             <div>
               <div className="text-xs text-muted-foreground mb-1">{t('referenceAmount')}</div>
               <div className="text-2xl font-bold">
-                R${formatCurrency(marketReferenceAmount)}
+                R${formatCurrency(gbpAmount * MARKET_MID_GBPBRL)}
               </div>
               <div className="text-xs text-muted-foreground mt-1">
                 £{gbpAmount.toLocaleString()} × 7.21137
