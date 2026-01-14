@@ -1,0 +1,179 @@
+{
+  "common": {
+    "learnMore": "Learn how it works",
+    "simulateNow": "Simulate now",
+    "showDetails": "Show calculation steps",
+    "hideDetails": "Hide calculation steps",
+    "bestProvider": "Best provider",
+    "difference": "Difference vs Best Provider",
+    "savings": "Savings",
+    "youSend": "You send",
+    "youReceive": "You receive",
+    "updated": "Updated",
+    "allCostsShown": "All costs shown",
+    "sourcesLinked": "Sources linked",
+    "viewSources": "View sources",
+    "vs": "vs"
+  },
+  "hero": {
+    "title": "FX Pricing, Explained.",
+    "subtitle": "Audit-ready breakdown of what each route takes — and why market-based execution is cheaper.",
+    "trustStrip": "All costs shown • Sources linked • Updated timestamp"
+  },
+  "marketReference": {
+    "title": "Market Reference Rates",
+    "subtitle": "Real-time rates from institutional sources",
+    "header": "Market Data",
+    "mid": "Mid",
+    "bid": "Bid",
+    "ask": "Ask",
+    "spread": "Spread",
+    "gbpUsd": {
+      "title": "GBP/USD",
+      "description": "Bank FX Reference",
+      "railExplainer": "Traditional bank FX reference."
+    },
+    "usdBrl": {
+      "title": "USD/BRL",
+      "description": "Local Settlement (e.g., Wise)",
+      "railExplainer": "FX with local settlement partner."
+    },
+    "usdtBrl": {
+      "title": "USDT/BRL",
+      "description": "Stablecoin Settlement Rail",
+      "footer": "USDT is a dollar-pegged stablecoin used as a settlement rail.",
+      "railExplainer": "USDT is a dollar-pegged stablecoin used as a settlement rail."
+    },
+    "railBadge": {
+      "bankFx": "Bank FX",
+      "localSettlement": "Local Settlement",
+      "stablecoinRail": "Stablecoin Rail"
+    }
+  },
+  "simulator": {
+    "title": "Cost Simulator",
+    "subtitle": "Compare total costs across providers",
+    "header": "Execution Panel",
+    "tradeParams": "Trade Parameters",
+    "inputLabel": "Amount to send",
+    "outputLabel": "Amount received",
+    "fxSpread": "FX Spread",
+    "explicitFees": "Explicit Fees",
+    "iof": "IOF",
+    "settlementLayers": "Settlement Layers",
+    "totalCost": "Total Cost",
+    "iofNote": "IOF depends on structure (not fixed)",
+    "iofStandard": "Standard (3.5%)",
+    "iofOptimized": "Optimized (varies)",
+    "iofVariable": "Variable by structure",
+    "iofToggleLabel": "IOF Regime Comparison",
+    "iofToggleDescription": "Toggle to compare IOF scenarios",
+    "costStack": "Cost Stack",
+    "coinsIofNote": "IOF depends on transaction structure",
+    "coinsIofVariable": "IOF varies based on structure",
+    "costLegend": {
+      "spread": "Spread",
+      "fees": "Fees",
+      "iof": "IOF"
+    },
+    "bestForScenario": "Best for this scenario"
+  },
+  "providers": {
+    "bank": "Bank",
+    "wise": "Wise",
+    "coins": "Coins"
+  },
+  "diagrams": {
+    "costLayers": {
+      "title": "Where the Cost Comes From",
+      "subtitle": "Breakdown of fees and spreads by provider",
+      "headerLabel": "Cost Analysis",
+      "legend": {
+        "fxSpread": "FX Spread",
+        "fees": "Fees",
+        "iof": "IOF"
+      },
+      "header": "Cost Breakdown by Provider (bps)"
+    },
+    "swiftMaze": {
+      "title": "SWIFT Maze vs Direct Path",
+      "subtitle": "Traditional correspondent banking vs market-based settlement",
+      "headerLabel": "Settlement Flow",
+      "traditional": "Traditional Route",
+      "direct": "Direct Route",
+      "correspondentBank": "Correspondent Bank",
+      "localBank": "Local Bank",
+      "sender": "Sender",
+      "receiver": "Receiver",
+      "market": "Market",
+      "stablecoin": "Stablecoin Rail",
+      "layerCount": "layers",
+      "nostroVostro": "Nostro/Vostro",
+      "fxMarkup": "FX Markup"
+    },
+    "bidAsk": {
+      "title": "Bid / Ask / Spread",
+      "subtitle": "Understanding market pricing",
+      "headerLabel": "Pricing Mechanics",
+      "bidLabel": "Bid (Buy)",
+      "askLabel": "Ask (Sell)",
+      "midLabel": "Mid",
+      "spreadLabel": "Spread",
+      "explanation": "The spread is the difference between the buy and sell price. Lower spread = better rate.",
+      "header": "USD/BRL Spread Visualization"
+    }
+  },
+  "method": {
+    "title": "Method & Sources",
+    "subtitle": "Full transparency on our calculations",
+    "calculationSteps": "Calculation Steps",
+    "dataSources": "Data Sources",
+    "steps": {
+      "step1": "Fetch mid-market GBP/USD rate from Wise API",
+      "step2": "Fetch USD/BRL rate from local market reference",
+      "step3": "Fetch USDT/BRL rate from Binance order book",
+      "step4": "Calculate cross-rate GBP/BRL for each settlement rail",
+      "step5": "Apply provider-specific spread markups",
+      "step6": "Add explicit fees (flat + percentage)",
+      "step7": "Apply IOF based on selected regime",
+      "step8": "Calculate final output amounts for comparison"
+    },
+    "wiseMid": "Wise mid-market (FX reference)",
+    "binanceUsdt": "Binance USDT/BRL (crypto reference)",
+    "coinsOrderBook": "Coins order book / market execution",
+    "disclaimer": "Illustrative model; final quotes depend on execution and structure."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": {
+      "question": "Why does IOF vary?",
+      "answer": "IOF (Tax on Financial Operations) varies based on the transaction structure and purpose. Different operations have different tax rates, ranging from 0.38% to 6.38%."
+    },
+    "q2": {
+      "question": "How is spread calculated?",
+      "answer": "Spread is calculated as the difference between the bid and ask prices, expressed in basis points (bps). 1 bps = 0.01%."
+    },
+    "q3": {
+      "question": "Can I lock rates?",
+      "answer": "Rate locking depends on the provider and transaction size. Contact our Trade Desk for forward contracts and rate guarantees."
+    },
+    "q4": {
+      "question": "What is a stablecoin rail?",
+      "answer": "A stablecoin rail uses digital assets pegged to fiat currencies (like USDT to USD) for faster, cheaper cross-border settlement."
+    }
+  },
+  "audio": {
+    "title": "Audio Explainer",
+    "subtitle": "60-90s explainer",
+    "kidMode": "Explain like I'm 10",
+    "normalMode": "Standard explanation"
+  },
+  "footer": {
+    "tradeDesk": "Trade Desk",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "disclaimer": "Risk Disclaimer",
+    "copyright": "© 2026 Coins.xyz. All rights reserved."
+  }
+}
