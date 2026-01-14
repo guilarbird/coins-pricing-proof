@@ -2,6 +2,9 @@ import { useState, useContext } from 'react';
 import { useTranslations } from '@/hooks/useTranslations';
 import { LanguageContext } from '@/contexts/LanguageContext';
 import { DEFAULT_PRICING_MODELS, calculateFinalAmount } from '@/lib/pricing-model';
+import { CostLayersDiagram } from '@/components/CostLayersDiagram';
+import { SWIFTMazeDiagram } from '@/components/SWIFTMazeDiagram';
+import { BidAskSpreadDiagram } from '@/components/BidAskSpreadDiagram';
 
 export default function Home() {
   const { t, language } = useTranslations();
@@ -338,6 +341,29 @@ export default function Home() {
               <strong>{t('sourcesLabel')}:</strong> {t('sourcesDescription')}
             </p>
           </div>
+        </div>
+
+        {/* Educational Diagrams Section */}
+        <div className="mb-12 space-y-8">
+          <h2 className="text-2xl font-bold">{t('howItWorks')}</h2>
+
+          {/* Cost Layers Diagram */}
+          <CostLayersDiagram
+            gbpAmount={gbpAmount}
+            marketMidRate={MARKET_MID_GBPBRL}
+            models={pricingModels}
+            selectedModel={coinsModel}
+            iofRegime={coinsIofRegime}
+          />
+
+          {/* Bid/Ask/Spread Diagram */}
+          <BidAskSpreadDiagram
+            midRate={MARKET_MID_GBPBRL}
+            spreadBps={bankModel.fxSpreadBps}
+          />
+
+          {/* SWIFT Maze Diagram */}
+          <SWIFTMazeDiagram />
         </div>
 
         {/* Footer */}
