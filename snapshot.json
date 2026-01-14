@@ -1,0 +1,96 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-01-13T23:19:08.604668+00:00",
+  "client": "Ed",
+  "inputs": {
+    "amount_gbp": 100000,
+    "bank_fx_markup_bps": 80,
+    "bank_fee_pct": 0.8,
+    "pricing_mode": "indicative",
+    "network_fee_usdt": 5.0
+  },
+  "price_holders": {
+    "GBPUSD": {
+      "pair": "GBPUSD",
+      "bid": 1.274,
+      "ask": 1.276,
+      "mid": 1.275,
+      "source": "simulated",
+      "timestamp": "2026-01-13T23:19:08.604547+00:00",
+      "staleness_seconds": 0,
+      "spread_bps": 15.69,
+      "is_fallback": true
+    },
+    "USDBRL": {
+      "pair": "USDBRL",
+      "bid": 5.18,
+      "ask": 5.195,
+      "mid": 5.1875,
+      "source": "simulated",
+      "timestamp": "2026-01-13T23:19:08.002518+00:00",
+      "staleness_seconds": 0,
+      "spread_bps": 28.92,
+      "is_fallback": true
+    },
+    "GBPBRL": {
+      "pair": "GBPBRL",
+      "bid": 6.59932,
+      "ask": 6.62882,
+      "mid": 6.61407,
+      "source": "derived",
+      "timestamp": "2026-01-13T23:19:08.002566+00:00",
+      "staleness_seconds": 0,
+      "spread_bps": 44.6,
+      "is_fallback": false
+    }
+  },
+  "comparison": {
+    "amount_gbp": 100000,
+    "reference_brl": 661407.0,
+    "timestamp": "2026-01-13T23:19:08.604630+00:00",
+    "bank": {
+      "name": "Banco Tradicional",
+      "brl_received": 628086.47941632,
+      "cost_brl": 33320.52058368005,
+      "cost_bps": 503.7824000000008,
+      "time": "1-2 dias \u00fateis",
+      "fx_markup_bps": 80,
+      "fee_pct": 0.8,
+      "iof_pct": 3.5,
+      "breakdown": {
+        "hidden_fx_cost_brl": 5291.256000000052,
+        "explicit_fee_brl": 5248.925952,
+        "iof_cost_brl": 22780.338631680002
+      }
+    },
+    "coins": {
+      "name": "Coins.xyz Rail",
+      "brl_received": 661380.3124999999,
+      "cost_brl": 26.687500000116415,
+      "cost_bps": 0.4034958807529466,
+      "time": "minutos a horas",
+      "pricing_mode": "indicative",
+      "network_fee_usdt": 5.0,
+      "breakdown": {
+        "gbpusd_slippage_bps": 0.0,
+        "network_fee_brl": 25.9375,
+        "usdbrl_slippage_bps": 0.0
+      }
+    },
+    "delta": {
+      "brl": 33293.8330836799,
+      "bps": 503.3789041192473,
+      "savings_pct": 99.9199067135427,
+      "winner": "Coins.xyz"
+    }
+  },
+  "proof_message": "Snapshot \u00a3100,000 \u2192 Bank: R$628,086.48 | Coins: R$661,380.31 | \u0394: R$33,293.83 (503.38 bps). Timestamp: 2026-01-13T23:19:08.604630+00:00. Sources: B, a, n, c, o,  , T, r, a, d, i, c, i, o, n, a, l,  , v, s,  , C, o, i, n, s, ., x, y, z,  , R, a, i, l",
+  "audit_trail": {
+    "sources": [
+      "derived",
+      "simulated"
+    ],
+    "timestamp": "2026-01-13T23:19:08.604630+00:00"
+  },
+  "integrity_hash": "6c8c5ced78818d833b12f7f92060a7d8174b4c8bdbe391f72999ada05aa63ab6"
+}
