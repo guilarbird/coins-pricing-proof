@@ -1,415 +1,361 @@
-'use client';
-
-import { ChevronDown, TrendingUp, TrendingDown, Play, Pause, Volume2, HelpCircle, Globe, Info } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import { FXDiagrams } from '../components/FXDiagrams';
-import { CostStack } from '../components/CostStack';
-import { AuditSummary } from '../components/AuditSummary';
-import { StablecoinRail } from '../components/StablecoinRail';
-import { translations } from '../lib/translations';
-import { formatCurrency, formatPercent } from '../lib/formatters';
-
-type Language = 'pt' | 'en' | 'zh';
-
-// Old translations kept for reference - now using centralized translations.ts
-
-const BANK_SPREAD_BPS = 250; // 2.5%
-const BANK_FEE_PCT = 0.008; // 0.8%
-const BANK_IOF_PCT = 0.035; // 3.5%
-const WISE_FEE_GBP = 6.23; // Fixed fee for 1000 GBP
-const WISE_IOF_PCT = 0.011; // ~1.1% (structure-dependent)
-const COINS_NETWORK_FEE_USD = 5;
-const COINS_IOF_PCT = 0.035; // 3.5%
+import { useState, useContext } from 'react';
+import { useTranslations } from '@/hooks/useTranslations';
+import { LanguageContext } from '@/contexts/LanguageContext';
 
 export default function Home() {
-  const [language, setLanguage] = useState<Language>('pt');
-  const [amount, setAmount] = useState(1000);
-  const [fxRates, setFxRates] = useState({
-    gbpUsd: 1.27,
-    usdBrl: 5.19,
-    usdtBrl: 5.3754,
-  });
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const { t, language } = useTranslations();
+  const { setLanguage } = useContext(LanguageContext);
 
-  const t = translations[language];
+  // ============================================================================
+  // MARKET REFERENCE (FIXED FOR THIS EXAMPLE)
+  // ============================================================================
+  const MARKET_MID_GBPBRL = 7.21137;
+  const MARKET_MID_TIMESTAMP = '13 Jan 2026, 20:00 GMT';
 
-  // Fetch FX rates
-  useEffect(() => {
-    const fetchRates = async () => {
-      try {
-        const [gbpUsdRes, usdBrlRes, usdtBrlRes] = await Promise.all([
-          fetch('https://api.wise.com/v1/rates?source=GBP&target=USD'),
-          fetch('https://api.wise.com/v1/rates?source=USD&target=BRL'),
-          fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTBRL'),
-        ]);
+  // ============================================================================
+  // USER INPUTS (ADJUSTABLE)
+  // ============================================================================
+  const [gbpAmount, setGbpAmount] = useState(1000);
+  const [bankSpreadBps, setBankSpreadBps] = useState(80);
+  const [bankFeePct, setBankFeePct] = useState(0.8);
+  const [iofTaxPct] = useState(3.5);
+  const [coinsNetworkFeeUsd] = useState(5);
 
-        const gbpUsdData = await gbpUsdRes.json();
-        const usdBrlData = await usdBrlRes.json();
-        const usdtBrlData = await usdtBrlRes.json();
+  // ============================================================================
+  // CALCULATIONS
+  // ============================================================================
+  const marketReferenceAmount = gbpAmount * MARKET_MID_GBPBRL;
 
-        setFxRates({
-          gbpUsd: gbpUsdData.rate || 1.27,
-          usdBrl: usdBrlData.rate || 5.19,
-          usdtBrl: parseFloat(usdtBrlData.price) || 5.3754,
-        });
-      } catch (error) {
-        console.error('Error fetching rates:', error);
-      }
-    };
+  // BANK TRANSFER MODEL
+  const bankExecutionRate = MARKET_MID_GBPBRL * (1 - bankSpreadBps / 10000);
+  const bankAfterSpread = gbpAmount * bankExecutionRate;
+  const bankSpreadCost = marketReferenceAmount - bankAfterSpread;
+  const bankExplicitFee = bankAfterSpread * (bankFeePct / 100);
+  const bankIofTax = bankAfterSpread * (iofTaxPct / 100);
+  const bankFinalAmount = bankAfterSpread - bankExplicitFee - bankIofTax;
+  const bankTotalCost = bankSpreadCost + bankExplicitFee + bankIofTax;
+  const bankTotalCostPct = (bankTotalCost / marketReferenceAmount) * 100;
 
-    fetchRates();
-    const interval = setInterval(fetchRates, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  // WISE TRANSFER MODEL
+  const WISE_FIXED_FEE_GBP = 9.99;
+  const wiseAfterFee = gbpAmount - WISE_FIXED_FEE_GBP;
+  const wiseAfterConversion = wiseAfterFee * MARKET_MID_GBPBRL;
+  const wiseIofTax = wiseAfterConversion * (iofTaxPct / 100);
+  const wiseFinalAmount = wiseAfterConversion - wiseIofTax;
+  const wiseTotalCost = (gbpAmount * MARKET_MID_GBPBRL) - wiseFinalAmount;
+  const wiseTotalCostPct = (wiseTotalCost / marketReferenceAmount) * 100;
 
-  // Calculate pricing
-  const gbpBrlMid = fxRates.gbpUsd * fxRates.usdBrl;
+  // COINS TRANSFER MODEL
+  const USDBRL_RATE = 5.19;
+  const coinsNetworkFeeBrl = coinsNetworkFeeUsd * USDBRL_RATE;
+  const coinsAfterNetwork = marketReferenceAmount - coinsNetworkFeeBrl;
+  const coinsIofTax = coinsAfterNetwork * (iofTaxPct / 100);
+  const coinsFinalAmount = coinsAfterNetwork - coinsIofTax;
+  const coinsTotalCost = marketReferenceAmount - coinsFinalAmount;
+  const coinsTotalCostPct = (coinsTotalCost / marketReferenceAmount) * 100;
 
-  // Bank Transfer
-  const bankExecutionRate = gbpBrlMid * (1 - BANK_SPREAD_BPS / 10000);
-  const bankConverted = amount * bankExecutionRate;
-  const bankFee = bankConverted * BANK_FEE_PCT;
-  const bankIof = bankConverted * BANK_IOF_PCT;
-  const bankFinal = bankConverted - bankFee - bankIof;
-  const bankCost = gbpBrlMid * amount - bankFinal;
+  // COMPARISONS
+  const coinsVsBankSavings = bankFinalAmount - coinsFinalAmount;
+  const coinsVsWiseSavings = wiseFinalAmount - coinsFinalAmount;
 
-  // Wise
-  const wiseConverted = amount * gbpBrlMid;
-  const wiseFee = WISE_FEE_GBP * gbpBrlMid;
-  const wiseIof = wiseConverted * WISE_IOF_PCT;
-  const wiseFinal = wiseConverted - wiseFee - wiseIof;
-  const wiseCost = gbpBrlMid * amount - wiseFinal;
-
-  // Coins
-  const coinsConverted = amount * gbpBrlMid;
-  const coinsNetworkFee = COINS_NETWORK_FEE_USD * fxRates.usdBrl;
-  const coinsIof = coinsConverted * COINS_IOF_PCT;
-  const coinsFinal = coinsConverted - coinsNetworkFee - coinsIof;
-  const coinsCost = gbpBrlMid * amount - coinsFinal;
-
-  const savings = bankFinal - coinsFinal;
-  const isCoinsBest = coinsFinal > bankFinal && coinsFinal > wiseFinal;
-
-  const togglePlayback = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
-    }
-  };
-
-  const handlePlaybackRateChange = (rate: number) => {
-    setPlaybackRate(rate);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = rate;
-    }
-  };
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  // Locale formatting helper
+  const formatCurrency = (amount: number) => {
+    const locale = language === 'pt' ? 'pt-BR' : 'en-US';
+    return amount.toLocaleString(locale, { maximumFractionDigits: 2 });
   };
 
   return (
-    <div className="min-h-screen bg-navy text-ice-blue">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-white/10 backdrop-blur-md bg-slate/30 sticky top-0 z-50">
-        <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            <img src="/logo-whi.png" alt="coins.xyz" className="h-8" />
-          </div>
-          <button
-            onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg glass-card hover:bg-white/10"
-          >
-            <Globe className="w-4 h-4" />
-            <span className="text-sm font-medium">{language.toUpperCase()}</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section className="container py-12 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-ice-blue via-slate-200 to-ice-blue bg-clip-text text-transparent">
-          {t.title}
-        </h1>
-        <p className="text-lg text-slate-400 mb-2">{t.subtitle}</p>
-        <p className="text-sm text-slate-500">Updated now</p>
-      </section>
-
-      {/* Market Reference */}
-      <section className="container py-8">
-        <h2 className="text-2xl font-semibold tracking-wider mb-6">{t.marketReference}</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {/* GBP/USD */}
-          <div className="glass-card p-6">
-            <p className="text-slate-400 text-sm mb-2">GBP/USD</p>
-            <p className="text-3xl font-bold mb-4">{fxRates.gbpUsd.toFixed(4)}</p>
-            <p className="text-xs text-slate-500 mb-4">{t.midMarket}</p>
-            <div className="border-t border-white/10 pt-4 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-bid font-semibold">Bid (Compra)</span>
-                <span className="text-bid">{(fxRates.gbpUsd - 0.0005).toFixed(4)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-ask font-semibold">Ask (Venda)</span>
-                <span className="text-ask">{(fxRates.gbpUsd + 0.0005).toFixed(4)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-spread font-semibold">{t.spread}</span>
-                <span className="text-spread">0.0010 (7.87 bps)</span>
-              </div>
-            </div>
-          </div>
-
-          {/* USD/BRL (Wise) */}
-          <div className="glass-card p-6">
-            <p className="text-slate-400 text-sm mb-2">USD/BRL (Wise)</p>
-            <p className="text-3xl font-bold mb-4">{fxRates.usdBrl.toFixed(4)}</p>
-            <p className="text-xs text-slate-500 mb-4">{t.midMarket}</p>
-            <div className="border-t border-white/10 pt-4 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-bid font-semibold">Bid (Compra)</span>
-                <span className="text-bid">{(fxRates.usdBrl - 0.01).toFixed(4)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-ask font-semibold">Ask (Venda)</span>
-                <span className="text-ask">{(fxRates.usdBrl + 0.01).toFixed(4)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-spread font-semibold">{t.spread}</span>
-                <span className="text-spread">0.0200 (38.54 bps)</span>
-              </div>
-            </div>
-          </div>
-
-          {/* USDT/BRL (Binance) */}
-          <div className="glass-card p-6">
-            <p className="text-slate-400 text-sm mb-2">USDT/BRL (Binance)</p>
-            <p className="text-3xl font-bold mb-4">{fxRates.usdtBrl.toFixed(4)}</p>
-            <p className="text-xs text-slate-500 mb-4">{t.midMarket}</p>
-            <div className="border-t border-white/10 pt-4 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-bid font-semibold">Bid (Compra)</span>
-                <span className="text-bid">{(fxRates.usdtBrl - 0.02).toFixed(4)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-ask font-semibold">Ask (Venda)</span>
-                <span className="text-ask">{(fxRates.usdtBrl + 0.02).toFixed(4)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-spread font-semibold">{t.spread}</span>
-                <span className="text-spread">0.0400 (75.08 bps)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Educational Diagrams Section */}
-      <section className="container py-8">
-        <h2 className="text-2xl font-semibold tracking-wider mb-6">Como Funciona o Câmbio</h2>
-        <FXDiagrams language={language} isAudioPlaying={isPlaying} audioTime={currentTime} />
-      </section>
-
-      {/* Audio Explanation */}
-      <section className="container py-8">
-        <h2 className="text-2xl font-semibold tracking-wider mb-6">Market Architecture Audio</h2>
-        <div className="glass-card p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <button
-              onClick={togglePlayback}
-              className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-gold flex items-center justify-center hover:shadow-lg transition-all"
-            >
-              {isPlaying ? (
-                <Pause className="w-6 h-6 text-slate-900" />
-              ) : (
-                <Play className="w-6 h-6 text-slate-900" />
-              )}
-            </button>
-            <div className="flex-1">
-              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-gold transition-all"
-                  style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-slate-400 mt-2">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
-              </div>
-            </div>
+      <div className="border-b border-border">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {[1, 1.25, 1.5].map((rate) => (
-                <button
-                  key={rate}
-                  onClick={() => handlePlaybackRateChange(rate)}
-                  className={`px-2 py-1 text-xs rounded transition-all ${
-                    playbackRate === rate
-                      ? 'bg-gradient-gold text-slate-900 font-semibold'
-                      : 'bg-white/10 text-slate-300 hover:bg-white/20'
-                  }`}
-                >
-                  {rate}x
-                </button>
-              ))}
+              <svg
+                className="w-6 h-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-label={t('coinsXyz')}
+              >
+                <path
+                  d="M12 2L18 6V12L12 16L6 12V6L12 2Z"
+                  fill="currentColor"
+                  className="text-purple-600"
+                />
+                <path
+                  d="M12 8L15 10V14L12 16L9 14V10L12 8Z"
+                  fill="currentColor"
+                  className="text-red-500"
+                />
+              </svg>
+              <span className="font-bold text-lg">{t('coinsXyz')}</span>
+            </div>
+            <div className="flex items-center gap-4">
+              {/* Language Toggle */}
+              <div className="flex gap-2 bg-slate-800/50 p-1 rounded">
+                {(['en', 'pt', 'zh'] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setLanguage(lang)}
+                    className={`px-3 py-1 rounded text-sm font-medium transition ${
+                      language === lang
+                        ? 'bg-slate-600 text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                    aria-label={`Switch to ${lang.toUpperCase()}`}
+                  >
+                    {lang.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              <div className="px-3 py-1 rounded text-sm font-medium bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900">
+                <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                {t('live')}
+              </div>
             </div>
           </div>
-          <audio
-            ref={audioRef}
-            src="/fx-pricing-explanation.wav"
-            onTimeUpdate={handleTimeUpdate}
-            onLoadedMetadata={handleLoadedMetadata}
-            onEnded={() => setIsPlaying(false)}
-          />
-          <p className="text-sm text-slate-400">
-            2-minute explanation: How FX pricing works, why spreads differ, and why market-based execution matters.
-          </p>
         </div>
-      </section>
+      </div>
 
-      {/* Transfer Simulator */}
-      <section className="container py-8">
-        <h2 className="text-2xl font-semibold tracking-wider mb-6">{t.transferSimulator}</h2>
-        <div className="glass-card p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12 max-w-5xl">
+        {/* Title */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold mb-4">{t('title')}</h1>
+          <p className="text-lg text-muted-foreground">{t('subtitle')}</p>
+        </div>
+
+        {/* Market Reference Section */}
+        <div className="mb-12 p-6 bg-slate-900/50 dark:bg-slate-800/50 border border-slate-700/50 rounded-lg">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold mb-2">{t('marketReference')}</h2>
+            <p className="text-sm text-muted-foreground">{t('marketRefDescription')}</p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 mb-6">
             <div>
-              <label className="block text-sm text-slate-400 mb-2">{t.youSend}</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                  className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-ice-blue placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-gold"
-                />
-                <div className="px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-slate-400 font-semibold">
-                  GBP
+              <div className="text-xs text-muted-foreground mb-1">{t('midMarketRate')}</div>
+              <div className="text-2xl font-bold">7.21137 BRL/GBP</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {t('source')}: Wise
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">{t('timestamp')}</div>
+              <div className="text-2xl font-bold">13 Jan 2026</div>
+              <div className="text-xs text-muted-foreground mt-1">20:00 GMT</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">{t('referenceAmount')}</div>
+              <div className="text-2xl font-bold">
+                R${formatCurrency(marketReferenceAmount)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                £{gbpAmount.toLocaleString()} × 7.21137
+              </div>
+            </div>
+          </div>
+
+          {/* Amount Input */}
+          <div className="flex items-center gap-4">
+            <label className="text-sm font-medium">{t('adjustAmount')}</label>
+            <input
+              type="number"
+              value={gbpAmount}
+              onChange={(e) => setGbpAmount(Number(e.target.value))}
+              className="w-32 px-3 py-2 bg-slate-700 border border-slate-600 rounded text-sm text-foreground"
+              min="100"
+              max="1000000"
+              step="100"
+              aria-label={t('adjustAmount')}
+            />
+            <span className="text-sm text-muted-foreground">{t('gbp')}</span>
+          </div>
+        </div>
+
+        {/* Three-Way Comparison */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">{t('howMuchYouReceive')}</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Bank Transfer */}
+            <div className="border border-red-900/50 bg-red-950/20 rounded-lg p-6">
+              <div className="mb-6">
+                <h3 className="font-semibold text-lg mb-2">{t('traditionalBank')}</h3>
+                <p className="text-xs text-muted-foreground">{t('bankDescription')}</p>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('spread')}:</span>
+                  <span className="font-mono">{bankSpreadBps} bps</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('fee')}:</span>
+                  <span className="font-mono">{bankFeePct}%</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('iofTax')}:</span>
+                  <span className="font-mono">{iofTaxPct}%</span>
                 </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm text-slate-400 mb-2">{t.youReceive}</label>
-              <div className="px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-ice-blue font-bold text-lg">
-                {formatCurrency(coinsFinal, 'BRL', language)}
-              </div>
-            </div>
-          </div>
 
-          {/* Comparison Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Bank */}
-            <div className="border-l-4 border-red-500 pl-4 py-4">
-              <p className="text-sm text-slate-400 mb-2">{t.bankTransfer}</p>
-              <p className="text-2xl font-bold text-red-400 mb-2">{formatCurrency(bankFinal, 'BRL', language)}</p>
-              <p className="text-xs text-red-400">
-                {t.cost}: {formatCurrency(bankCost, 'BRL', language)} ({formatPercent((bankCost / (gbpBrlMid * amount)) * 100)})
-              </p>
+              <div className="border-t border-red-900/30 pt-4">
+                <div className="text-xs text-muted-foreground mb-1">{t('youReceive')}</div>
+                <div className="text-2xl font-bold text-red-400 mb-2">
+                  R${formatCurrency(bankFinalAmount)}
+                </div>
+                <div className="text-xs text-red-400">
+                  {t('cost')}: R${formatCurrency(bankTotalCost)} ({bankTotalCostPct.toFixed(2)}%)
+                </div>
+              </div>
+
+              {/* Adjustable Parameters */}
+              <div className="mt-6 pt-6 border-t border-red-900/30 space-y-4">
+                <div>
+                  <label className="text-xs font-medium mb-2 block">{t('adjustSpread')}:</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    step="10"
+                    value={bankSpreadBps}
+                    onChange={(e) => setBankSpreadBps(Number(e.target.value))}
+                    className="w-full"
+                    aria-label={t('adjustSpread')}
+                  />
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {bankSpreadBps} bps = {(bankSpreadBps / 100).toFixed(2)}%
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium mb-2 block">
+                    {t('fee')} (%):
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="3"
+                    step="0.1"
+                    value={bankFeePct}
+                    onChange={(e) => setBankFeePct(Number(e.target.value))}
+                    className="w-full"
+                    aria-label={t('fee')}
+                  />
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {bankFeePct.toFixed(1)}%
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Wise */}
-            <div className="border-l-4 border-amber-500 pl-4 py-4">
-              <p className="text-sm text-slate-400 mb-2">{t.wise}</p>
-              <p className="text-2xl font-bold text-amber-400 mb-2">{formatCurrency(wiseFinal, 'BRL', language)}</p>
-              <p className="text-xs text-amber-400">
-                {t.cost}: {formatCurrency(wiseCost, 'BRL', language)} ({formatPercent((wiseCost / (gbpBrlMid * amount)) * 100)})
-              </p>
+            <div className="border border-yellow-900/50 bg-yellow-950/20 rounded-lg p-6">
+              <div className="mb-6">
+                <h3 className="font-semibold text-lg mb-2">{t('wise')}</h3>
+                <p className="text-xs text-muted-foreground">{t('wiseDescription')}</p>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('spread')}</span>
+                  <span className="font-mono">0 bps</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('fee')}</span>
+                  <span className="font-mono">£9.99</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('iofTax')}</span>
+                  <span className="font-mono">{iofTaxPct}%</span>
+                </div>
+              </div>
+
+              <div className="border-t border-yellow-900/30 pt-4">
+                <div className="text-xs text-muted-foreground mb-1">{t('youReceive')}</div>
+                <div className="text-2xl font-bold text-yellow-400 mb-2">
+                  R${formatCurrency(wiseFinalAmount)}
+                </div>
+                <div className="text-xs text-yellow-400">
+                  {t('cost')}: R${formatCurrency(wiseTotalCost)} ({wiseTotalCostPct.toFixed(2)}%)
+                </div>
+              </div>
             </div>
 
             {/* Coins */}
-            <div className="border-l-4 border-emerald-500 pl-4 py-4 relative">
-              {isCoinsBest && (
-                <div className="absolute top-2 right-2 bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded border border-emerald-500/30 font-semibold">
-                  Best
+            <div className="border border-green-900/50 bg-green-950/20 rounded-lg p-6">
+              <div className="mb-6">
+                <h3 className="font-semibold text-lg mb-2">{t('coins')}</h3>
+                <p className="text-xs text-muted-foreground">{t('coinsDescription')}</p>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('spread')}</span>
+                  <span className="font-mono">0 bps</span>
                 </div>
-              )}
-              <p className="text-sm text-slate-400 mb-2">{t.coins}</p>
-              <p className="text-2xl font-bold text-emerald-400 mb-2">{formatCurrency(coinsFinal, 'BRL', language)}</p>
-              {isCoinsBest ? (
-                <p className="text-xs text-emerald-400">
-                  Savings vs Bank: {formatCurrency(savings, 'BRL', language)} ({formatPercent((savings / (gbpBrlMid * amount)) * 100)})
-                </p>
-              ) : (
-                <p className="text-xs text-slate-400">
-                  Difference vs Bank: {formatCurrency(bankFinal - coinsFinal, 'BRL', language)}
-                </p>
-              )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('fee')}</span>
+                  <span className="font-mono">$5 USD</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('iofTax')}</span>
+                  <span className="font-mono">{t('structureDependent')}</span>
+                </div>
+              </div>
+
+              <div className="border-t border-green-900/30 pt-4">
+                <div className="text-xs text-muted-foreground mb-1">{t('youReceive')}</div>
+                <div className="text-2xl font-bold text-green-400 mb-2">
+                  R${formatCurrency(coinsFinalAmount)}
+                </div>
+                <div className="text-xs text-green-400">
+                  {t('cost')}: R${formatCurrency(coinsTotalCost)} ({coinsTotalCostPct.toFixed(2)}%)
+                </div>
+              </div>
+
+              {/* Savings */}
+              <div className="mt-6 pt-6 border-t border-green-900/30 space-y-2">
+                <div className="text-xs font-semibold text-green-400">
+                  {coinsVsBankSavings > 0
+                    ? `+R$${formatCurrency(coinsVsBankSavings)} ${t('vsBankShort')}`
+                    : `${t('costsMore')} ${t('traditionalBank')}`}
+                </div>
+                <div className="text-xs font-semibold text-green-400">
+                  {coinsVsWiseSavings > 0
+                    ? `+R$${formatCurrency(coinsVsWiseSavings)} ${t('vsWiseShort')}`
+                    : `${t('costsMore')} Wise`}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* CTAs */}
-        <div className="flex flex-col md:flex-row gap-4">
-          <button className="btn-premium flex-1">
-            {t.simulateNow}
-          </button>
-          <button className="px-6 py-3 rounded-lg glass-card hover:bg-white/10 font-semibold transition-all flex-1">
-            {t.createAccount}
-          </button>
+        {/* Explanations Section */}
+        <div className="mb-12 p-6 bg-slate-900/50 dark:bg-slate-800/50 border border-slate-700/50 rounded-lg">
+          <h2 className="text-lg font-semibold mb-6">{t('explanations')}</h2>
+          <div className="space-y-4 text-sm text-muted-foreground">
+            <p>
+              <strong>{t('iofTax')}:</strong> {t('iofTaxExplanation')}
+            </p>
+            <p>
+              <strong>{t('spread')}:</strong> {t('spreadExplanation')}
+            </p>
+            <p>
+              <strong>{t('fee')}:</strong> {t('feeExplanation')}
+            </p>
+            <p>
+              <strong>{t('sourcesLabel')}:</strong> {t('sourcesDescription')}
+            </p>
+          </div>
         </div>
-      </section>
 
-      {/* Audit Summary - Above the fold */}
-      <section className="container py-8">
-        <AuditSummary
-          amount={amount}
-          gbpBrlMid={gbpBrlMid}
-          coinsFinal={coinsFinal}
-          bankFinal={bankFinal}
-          wiseFinal={wiseFinal}
-          language={language}
-        />
-      </section>
-
-      {/* Cost Stack Visualization */}
-      <section className="container py-12">
-        <CostStack
-          amount={amount}
-          gbpBrlMid={gbpBrlMid}
-          bankFinal={bankFinal}
-          wiseFinal={wiseFinal}
-          coinsFinal={coinsFinal}
-          language={language}
-        />
-      </section>
-
-      {/* Stablecoin Rail Explainer */}
-      <section className="container py-12">
-        <StablecoinRail language={language} />
-      </section>
-
-      {/* Diagrams */}
-      <section className="container py-12">
-        <h2 className="text-2xl font-semibold tracking-wider mb-6">How It Works</h2>
-        <FXDiagrams language={language} />
-      </section>
-
-      {/* Footer */}
-      <section className="container py-12 border-t border-white/10 mt-12">
-        <p className="text-sm text-slate-500 text-center">
-          Rates updated in real-time from Wise and Binance APIs. IOF varies by settlement structure. All calculations are transparent and auditable.
-        </p>
-      </section>
+        {/* Footer */}
+        <div className="border-t border-border pt-8 text-center text-xs text-muted-foreground">
+          <p>{t('ratesUpdated')}</p>
+        </div>
+      </div>
     </div>
   );
 }

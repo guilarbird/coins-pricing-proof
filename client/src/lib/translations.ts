@@ -1,269 +1,224 @@
-export type Language = 'pt' | 'en' | 'zh';
-
-export const translations = {
+const translations = {
   pt: {
-    // Header & Hero
-    title: 'Digital FX',
-    subtitle: 'Entenda como o câmbio é precificado. Nenhum segredo.',
-    updatedNow: 'Atualizado agora',
+    // Header
+    coinsXyz: 'Coins.xyz',
+    live: 'Ao vivo',
     
-    // Market Reference
-    marketReference: 'Referência de Mercado',
-    midMarket: 'Mid-market',
-    bid: 'Bid (Compra)',
-    ask: 'Ask (Venda)',
-    spread: 'Spread de Câmbio',
+    // Title & Subtitle
+    title: 'Precificação de Transferência GBP → BRL',
+    subtitle: 'Comparação direta de como diferentes estruturas de transferência precificam uma conversão de GBP para BRL. Todos os cenários começam a partir da mesma referência de mercado.',
     
-    // Diagrams Section
-    howItWorks: 'Como Funciona o Câmbio',
-    
-    // Path of Money Diagram
-    pathTitle: 'O Caminho do Seu Dinheiro',
-    pathDescription: 'Como o dinheiro viaja através dos sistemas',
+    // Market Reference Section
+    marketReference: 'Referência de Mercado (Baseline)',
+    marketRefDescription: 'Isto é o que você receberia com taxas de mid-market sem markup ou taxas.',
+    midMarketRate: 'Taxa Mid-Market',
+    timestamp: 'Timestamp',
+    referenceAmount: 'Valor de Referência',
+    source: 'Fonte',
+    adjustAmount: 'Ajustar valor:',
     gbp: 'GBP',
-    fxMarket: 'Mercado FX',
-    bankRoute: 'Rota Bancária',
-    wiseRoute: 'Rota Wise',
-    coinsRoute: 'Rota Coins',
-    localBank: 'Banco Local',
-    swift: 'SWIFT/Bancos Correspondentes',
-    allRoutesStart: 'Todas as rotas começam do mesmo preço de mercado.',
-    coinsCuts: 'Coins reduz o número de intermediários.',
     
-    // Deconstructing Spreads Diagram
-    deconstructTitle: 'Desconstruindo Spreads de Câmbio',
-    deconstructDescription: 'Cada provedor "come" uma parte diferente',
-    hidden: 'Oculto',
-    bankFxRate: 'Taxa FX Bancária',
-    explicit: 'Explícito',
-    wiseFee: 'Taxa Wise',
-    zeroSpread: 'Zero-Spread',
-    coinsFx: 'Coins Mercado FX',
+    // How Much You Receive
+    howMuchYouReceive: 'Quanto Você Recebe',
     
-    // Impact of Wide Spreads Diagram
-    impactTitle: 'O Impacto de Spreads Largos',
-    impactDescription: 'Pequenas diferenças acumulam em grandes custos',
-    input: 'Entrada',
-    bank: 'Banco',
+    // Provider Names & Descriptions
+    traditionalBank: 'Banco Tradicional',
+    bankDescription: 'Transferência bancária típica com markup de FX oculto',
     wise: 'Wise',
+    wiseDescription: 'Transferência com taxa mid-market + taxa fixa + IOF',
     coins: 'Coins',
+    coinsDescription: 'Execução baseada em mercado com taxa de rede + IOF',
     
-    // Why IOF Varies Diagram
-    iofTitle: 'Por Que o IOF Varia',
-    iofDescription: 'A estrutura de liquidação determina o imposto',
-    sending: 'Enviando GBP',
-    foreignBanks: 'Bancos Estrangeiros',
-    settlement: 'Liquidação Bancária Local',
-    fullIof: 'IOF Completo',
-    reducedIof: 'IOF Reduzido',
-    transfersThrough: 'Transferências através de bancos estrangeiros estão sujeitas a impostos mais altos.',
-    localSettlement: 'Liquidação local resulta em impostos mais baixos. Reduz camadas.',
-    
-    // SWIFT Diagram
-    swiftMaze: 'SWIFT Maze vs Direct Path',
-    swiftDescription: 'Mais paradas = mais custos ocultos + mais atrasos. Menos paradas = mais do seu dinheiro chega.',
-    moreStops: 'Mais paradas',
-    fewerStops: 'Menos paradas',
-    
-    // Transfer Simulator
-    transferSimulator: 'Simulador de Transferência',
-    youSend: 'Você envia',
+    // Pricing Components
+    spread: 'Spread',
+    fee: 'Taxa',
+    iofTax: 'Imposto IOF',
     youReceive: 'Você recebe',
-    bankTransfer: 'Transferência Bancária',
     cost: 'Custo',
-    savings: 'Economia',
-    differenceVs: 'Diferença vs',
-    bestInThisScenario: 'Melhor neste cenário',
+    structureDependent: 'Depende da estrutura',
     costsMore: 'Custa mais que',
     
-    // CTAs
-    simulateNow: 'Simular Agora',
-    createAccount: 'Criar Conta',
-    learnMore: 'Saiba Como Funciona',
+    // Comparisons
+    vsBankShort: 'vs Banco',
+    vsWiseShort: 'vs Wise',
     
-    // Audio
-    marketArchitectureAudio: 'Áudio de Arquitetura de Mercado',
-    audioDescription: 'Explicação de 2 minutos: Como funciona a precificação de câmbio, por que os spreads diferem e por que a execução baseada em mercado importa.',
+    // Adjustments
+    adjustSpread: 'Ajustar Spread (bps)',
+    bpsPercentage: 'bps =',
     
-    // Footer
+    // Cost Breakdown
+    breakdown: 'Breakdown de Custos',
+    marketReferenceLabel: 'Referência de Mercado',
+    fxSpreadApplied: 'Spread de FX Aplicado',
+    explicitFee: 'Taxa Explícita',
+    totalCost: 'Custo Total',
+    
+    // Explanations Section
+    explanations: 'Explicações',
+    iofTaxExplanation: 'O IOF (Imposto sobre Operações Financeiras) de 3,5% é um imposto brasileiro que se aplica a todas as transferências internacionais, independentemente do provedor. Não pode ser evitado.',
+    spreadExplanation: 'Spread é a diferença entre preços de compra e venda. Bancos tradicionais embutem isso na taxa de câmbio; Wise cobra uma taxa explícita.',
+    feeExplanation: 'Taxas explícitas são cobradas pelo provedor. Coins cobra uma taxa de rede fixa em USD.',
+    
+    // Sources
+    sourcesLabel: 'Fontes',
+    sourcesDescription: 'Referência de mercado da taxa mid-market publicada pela Wise. Estimativas de spread bancário baseadas em pesquisa Airwallex. Taxa IOF de PagBrasil (julho 2025).',
     ratesUpdated: 'Taxas atualizadas em tempo real de APIs Wise e Binance. IOF varia por estrutura de liquidação. Todos os cálculos são transparentes e auditáveis.',
+    
+    // Diagrams
+    pathOfYourMoney: 'O Caminho do Seu Dinheiro',
+    deconstructingFxSpreads: 'Decompondo Spreads de FX',
+    impactOfWideSpreads: 'O Impacto de Spreads Largos',
+    whyIofVaries: 'Por Que o IOF Varia',
+    swiftMaze: 'Labirinto SWIFT vs Caminho Direto',
   },
   
   en: {
-    // Header & Hero
-    title: 'Digital FX',
-    subtitle: 'Understand how exchange rates are priced. No secrets.',
-    updatedNow: 'Updated now',
+    // Header
+    coinsXyz: 'Coins.xyz',
+    live: 'Live',
     
-    // Market Reference
-    marketReference: 'Market Reference',
-    midMarket: 'Mid-market',
-    bid: 'Bid (Buy)',
-    ask: 'Ask (Sell)',
-    spread: 'FX Spread',
+    // Title & Subtitle
+    title: 'GBP → BRL Transfer Pricing',
+    subtitle: 'A direct comparison of how different transfer structures price a GBP to BRL conversion. All scenarios start from the same market reference.',
     
-    // Diagrams Section
-    howItWorks: 'How FX Works',
-    
-    // Path of Money Diagram
-    pathTitle: 'The Path of Your Money',
-    pathDescription: 'How money travels through the system',
+    // Market Reference Section
+    marketReference: 'Market Reference (Baseline)',
+    marketRefDescription: 'This is what you would receive at mid-market rates with zero markup or fees.',
+    midMarketRate: 'Mid-Market Rate',
+    timestamp: 'Timestamp',
+    referenceAmount: 'Reference Amount',
+    source: 'Source',
+    adjustAmount: 'Adjust amount:',
     gbp: 'GBP',
-    fxMarket: 'FX Market',
-    bankRoute: 'Bank Route',
-    wiseRoute: 'Wise Route',
-    coinsRoute: 'Coins Route',
-    localBank: 'Local Bank',
-    swift: 'SWIFT/Correspondent Banks',
-    allRoutesStart: 'All routes start from the same market price.',
-    coinsCuts: 'Coins cuts the number of middlemen.',
     
-    // Deconstructing Spreads Diagram
-    deconstructTitle: 'Deconstructing FX Spreads',
-    deconstructDescription: 'Each provider "bites" a different amount',
-    hidden: 'Hidden',
-    bankFxRate: 'Bank FX Rate',
-    explicit: 'Explicit',
-    wiseFee: 'Wise Fee',
-    zeroSpread: 'Zero-Spread',
-    coinsFx: 'Coins Market FX',
+    // How Much You Receive
+    howMuchYouReceive: 'How Much You Receive',
     
-    // Impact of Wide Spreads Diagram
-    impactTitle: 'The Impact of Wide Spreads',
-    impactDescription: 'Small differences add up to big costs',
-    input: 'Input',
-    bank: 'Bank',
+    // Provider Names & Descriptions
+    traditionalBank: 'Traditional Bank',
+    bankDescription: 'Typical bank transfer with hidden FX markup',
     wise: 'Wise',
+    wiseDescription: 'Transfer with mid-market rate + fixed fee + IOF',
     coins: 'Coins',
+    coinsDescription: 'Market-based execution with network fee + IOF',
     
-    // Why IOF Varies Diagram
-    iofTitle: 'Why IOF Tax Varies',
-    iofDescription: 'Settlement structure determines the tax',
-    sending: 'Sending GBP',
-    foreignBanks: 'Foreign Banks',
-    settlement: 'Local Bank Settlement',
-    fullIof: 'Full 3.5% IOF',
-    reducedIof: 'Reduced (~1.0%) IOF',
-    transfersThrough: 'Transfers through foreign banks are subject to higher taxes.',
-    localSettlement: 'Local settlement results in lower taxes. Cuts layers.',
-    
-    // SWIFT Diagram
-    swiftMaze: 'SWIFT Maze vs Direct Path',
-    swiftDescription: 'More stops = more hidden costs + more delays. Fewer stops = more of your money arrives.',
-    moreStops: 'More stops',
-    fewerStops: 'Fewer stops',
-    
-    // Transfer Simulator
-    transferSimulator: 'Transfer Simulator',
-    youSend: 'You send',
+    // Pricing Components
+    spread: 'Spread',
+    fee: 'Fee',
+    iofTax: 'IOF Tax',
     youReceive: 'You receive',
-    bankTransfer: 'Bank Transfer',
     cost: 'Cost',
-    savings: 'Savings',
-    differenceVs: 'Difference vs',
-    bestInThisScenario: 'Best in this scenario',
+    structureDependent: 'Depends on structure',
     costsMore: 'Costs more than',
     
-    // CTAs
-    simulateNow: 'Simulate Now',
-    createAccount: 'Create Account',
-    learnMore: 'Learn How It Works',
+    // Comparisons
+    vsBankShort: 'vs Bank',
+    vsWiseShort: 'vs Wise',
     
-    // Audio
-    marketArchitectureAudio: 'Market Architecture Audio',
-    audioDescription: '2-minute explanation: How FX pricing works, why spreads differ, and why market-based execution matters.',
+    // Adjustments
+    adjustSpread: 'Adjust Spread (bps)',
+    bpsPercentage: 'bps =',
     
-    // Footer
+    // Cost Breakdown
+    breakdown: 'Cost Breakdown',
+    marketReferenceLabel: 'Market Reference',
+    fxSpreadApplied: 'FX Spread Applied',
+    explicitFee: 'Explicit Fee',
+    totalCost: 'Total Cost',
+    
+    // Explanations Section
+    explanations: 'Explanations',
+    iofTaxExplanation: 'The 3.5% IOF (Imposto sobre Operações Financeiras) is a Brazilian tax that applies to all international transfers, regardless of the provider. It cannot be avoided.',
+    spreadExplanation: 'Spread is the difference between buy and sell prices. Traditional banks embed this in the exchange rate; Wise charges an explicit fee.',
+    feeExplanation: 'Explicit fees are charged by the provider. Coins charges a fixed network fee in USD.',
+    
+    // Sources
+    sourcesLabel: 'Sources',
+    sourcesDescription: 'Market reference from Wise\'s published mid-market rate. Bank spread estimates based on Airwallex research. IOF rate from PagBrasil (July 2025).',
     ratesUpdated: 'Rates updated in real-time from Wise and Binance APIs. IOF varies by settlement structure. All calculations are transparent and auditable.',
+    
+    // Diagrams
+    pathOfYourMoney: 'The Path of Your Money',
+    deconstructingFxSpreads: 'Deconstructing FX Spreads',
+    impactOfWideSpreads: 'The Impact of Wide Spreads',
+    whyIofVaries: 'Why IOF Tax Varies',
+    swiftMaze: 'SWIFT Maze vs Direct Path',
   },
   
   zh: {
-    // Header & Hero
-    title: 'Digital FX',
-    subtitle: '了解汇率如何定价。没有秘密。',
-    updatedNow: '刚刚更新',
+    // Header
+    coinsXyz: 'Coins.xyz',
+    live: '实时',
     
-    // Market Reference
-    marketReference: '市场参考',
-    midMarket: '中间价',
-    bid: '买价',
-    ask: '卖价',
-    spread: '汇率差价',
+    // Title & Subtitle
+    title: 'GBP → BRL 转账定价',
+    subtitle: '直接比较不同转账结构如何定价 GBP 到 BRL 的转换。所有场景都从相同的市场参考开始。',
     
-    // Diagrams Section
-    howItWorks: '外汇如何运作',
-    
-    // Path of Money Diagram
-    pathTitle: '您的资金路径',
-    pathDescription: '资金如何通过系统流动',
+    // Market Reference Section
+    marketReference: '市场参考（基准）',
+    marketRefDescription: '这是您以中间市场汇率获得的金额，无加价或费用。',
+    midMarketRate: '中间市场汇率',
+    timestamp: '时间戳',
+    referenceAmount: '参考金额',
+    source: '来源',
+    adjustAmount: '调整金额：',
     gbp: 'GBP',
-    fxMarket: '外汇市场',
-    bankRoute: '银行路线',
-    wiseRoute: 'Wise路线',
-    coinsRoute: 'Coins路线',
-    localBank: '当地银行',
-    swift: 'SWIFT/代理银行',
-    allRoutesStart: '所有路线从相同的市场价格开始。',
-    coinsCuts: 'Coins减少了中间商的数量。',
     
-    // Deconstructing Spreads Diagram
-    deconstructTitle: '分解外汇点差',
-    deconstructDescription: '每个提供商"咬"不同的金额',
-    hidden: '隐藏',
-    bankFxRate: '银行汇率',
-    explicit: '明确',
-    wiseFee: 'Wise费用',
-    zeroSpread: '零点差',
-    coinsFx: 'Coins市场汇率',
+    // How Much You Receive
+    howMuchYouReceive: '您将收到多少',
     
-    // Impact of Wide Spreads Diagram
-    impactTitle: '宽点差的影响',
-    impactDescription: '小差异累积成大成本',
-    input: '输入',
-    bank: '银行',
+    // Provider Names & Descriptions
+    traditionalBank: '传统银行',
+    bankDescription: '典型的银行转账，隐藏 FX 加价',
     wise: 'Wise',
+    wiseDescription: '中间市场汇率 + 固定费用 + IOF 的转账',
     coins: 'Coins',
+    coinsDescription: '基于市场的执行，网络费 + IOF',
     
-    // Why IOF Varies Diagram
-    iofTitle: '为什么IOF税变化',
-    iofDescription: '结算结构决定税收',
-    sending: '发送GBP',
-    foreignBanks: '外国银行',
-    settlement: '当地银行结算',
-    fullIof: '完整3.5% IOF',
-    reducedIof: '减少(~1.0%) IOF',
-    transfersThrough: '通过外国银行的转账需要缴纳更高的税款。',
-    localSettlement: '当地结算导致更低的税款。减少层级。',
-    
-    // SWIFT Diagram
-    swiftMaze: 'SWIFT迷宫 vs 直接路径',
-    swiftDescription: '更多站点 = 更多隐藏成本 + 更多延迟。更少站点 = 更多资金到达。',
-    moreStops: '更多站点',
-    fewerStops: '更少站点',
-    
-    // Transfer Simulator
-    transferSimulator: '转账模拟器',
-    youSend: '您发送',
+    // Pricing Components
+    spread: '点差',
+    fee: '费用',
+    iofTax: 'IOF 税',
     youReceive: '您收到',
-    bankTransfer: '银行转账',
     cost: '成本',
-    savings: '节省',
-    differenceVs: '差异 vs',
-    bestInThisScenario: '此场景中最佳',
+    structureDependent: '取决于结构',
     costsMore: '成本高于',
     
-    // CTAs
-    simulateNow: '立即模拟',
-    createAccount: '创建账户',
-    learnMore: '了解工作原理',
+    // Comparisons
+    vsBankShort: '对比银行',
+    vsWiseShort: '对比 Wise',
     
-    // Audio
-    marketArchitectureAudio: '市场架构音频',
-    audioDescription: '2分钟解释：外汇定价如何运作、为什么点差不同以及为什么基于市场的执行很重要。',
+    // Adjustments
+    adjustSpread: '调整点差 (bps)',
+    bpsPercentage: 'bps =',
     
-    // Footer
-    ratesUpdated: '来自Wise和Binance API的实时更新汇率。IOF因结算结构而异。所有计算都是透明和可审计的。',
+    // Cost Breakdown
+    breakdown: '成本明细',
+    marketReferenceLabel: '市场参考',
+    fxSpreadApplied: '应用的 FX 点差',
+    explicitFee: '显式费用',
+    totalCost: '总成本',
+    
+    // Explanations Section
+    explanations: '解释',
+    iofTaxExplanation: '3.5% IOF（金融交易税）是巴西税，适用于所有国际转账，无论提供商如何。无法避免。',
+    spreadExplanation: '点差是买卖价格之间的差异。传统银行将其嵌入汇率；Wise 收取明确费用。',
+    feeExplanation: '显式费用由提供商收取。Coins 收取固定的美元网络费。',
+    
+    // Sources
+    sourcesLabel: '来源',
+    sourcesDescription: '来自 Wise 发布的中间市场汇率的市场参考。基于 Airwallex 研究的银行点差估计。来自 PagBrasil 的 IOF 费率（2025 年 7 月）。',
+    ratesUpdated: '来自 Wise 和 Binance API 的实时更新汇率。IOF 因结算结构而异。所有计算都是透明且可审计的。',
+    
+    // Diagrams
+    pathOfYourMoney: '您的钱的路径',
+    deconstructingFxSpreads: '分解 FX 点差',
+    impactOfWideSpreads: '宽点差的影响',
+    whyIofVaries: '为什么 IOF 税变化',
+    swiftMaze: 'SWIFT 迷宫对直接路径',
   },
 } as const;
 
 export type TranslationKey = keyof typeof translations.pt;
+
+export default translations;
