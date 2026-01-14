@@ -66,6 +66,10 @@ export const translations = {
     whyIofVaries: 'Por Que o IOF Varia',
     swiftMaze: 'Labirinto SWIFT vs Caminho Direto',
     
+    // Additional
+    structureDependent: 'Depende da estrutura',
+    costsMore: 'Custa mais que',
+    
     // Footer
     ratesUpdated: 'Taxas atualizadas em tempo real de APIs Wise e Binance. IOF varia por estrutura de liquidação. Todos os cálculos são transparentes e auditáveis.',
   },
@@ -134,6 +138,10 @@ export const translations = {
     impactOfWideSpreads: 'The Impact of Wide Spreads',
     whyIofVaries: 'Why IOF Tax Varies',
     swiftMaze: 'SWIFT Maze vs Direct Path',
+    
+    // Additional
+    structureDependent: 'Depends on structure',
+    costsMore: 'Costs more than',
     
     // Footer
     ratesUpdated: 'Rates updated in real-time from Wise and Binance APIs. IOF varies by settlement structure. All calculations are transparent and auditable.',
@@ -204,8 +212,12 @@ export const translations = {
     whyIofVaries: '为什么 IOF 税变化',
     swiftMaze: 'SWIFT 迷宫 vs 直接路径',
     
+    // Additional
+    structureDependent: '取决于结构',
+    costsMore: '成本高于',
+    
     // Footer
-    ratesUpdated: '来自 Wise 和 Binance API 的实时更新汇率。IOF 因结算结构而异。所有计算都是透明和可审计的。',
+    ratesUpdated: '来自 Wise 和 Binance API 的实时更新汇率。IOF 因结算结构而异。所有计算都是透明且可审计的。',
   },
 } as const;
 
