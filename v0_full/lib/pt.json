@@ -1,0 +1,179 @@
+{
+  "common": {
+    "learnMore": "Saiba como funciona",
+    "simulateNow": "Simular agora",
+    "showDetails": "Mostrar etapas de cálculo",
+    "hideDetails": "Ocultar etapas de cálculo",
+    "bestProvider": "Melhor provedor",
+    "difference": "Diferença vs Melhor Provedor",
+    "savings": "Economia",
+    "youSend": "Você envia",
+    "youReceive": "Você recebe",
+    "updated": "Atualizado",
+    "allCostsShown": "Todos os custos mostrados",
+    "sourcesLinked": "Fontes vinculadas",
+    "viewSources": "Ver fontes",
+    "vs": "vs"
+  },
+  "hero": {
+    "title": "Câmbio, Explicado.",
+    "subtitle": "Análise transparente de custos em cada rota — e por que a execução baseada no mercado é mais barata.",
+    "trustStrip": "Todos os custos mostrados • Fontes vinculadas • Atualizado em tempo real"
+  },
+  "marketReference": {
+    "title": "Taxas de Referência",
+    "subtitle": "Taxas em tempo real de fontes institucionais",
+    "header": "Dados de Mercado",
+    "mid": "Médio",
+    "bid": "Compra",
+    "ask": "Venda",
+    "spread": "Spread",
+    "gbpUsd": {
+      "title": "GBP/USD",
+      "description": "Referência Bancária",
+      "railExplainer": "Referência de FX bancário tradicional."
+    },
+    "usdBrl": {
+      "title": "USD/BRL",
+      "description": "Liquidação Local (ex: Wise)",
+      "railExplainer": "FX com parceiro de liquidação local."
+    },
+    "usdtBrl": {
+      "title": "USDT/BRL",
+      "description": "Rail de Stablecoin",
+      "footer": "USDT é uma stablecoin atrelada ao dólar usada como rail de liquidação.",
+      "railExplainer": "USDT é uma stablecoin atrelada ao dólar usada como rail de liquidação."
+    },
+    "railBadge": {
+      "bankFx": "FX Bancário",
+      "localSettlement": "Liquidação Local",
+      "stablecoinRail": "Rail Stablecoin"
+    }
+  },
+  "simulator": {
+    "title": "Simulador de Custos",
+    "subtitle": "Compare custos totais entre provedores",
+    "header": "Painel de Execução",
+    "tradeParams": "Parâmetros da Operação",
+    "inputLabel": "Valor a enviar",
+    "outputLabel": "Valor recebido",
+    "fxSpread": "Spread FX",
+    "explicitFees": "Taxas Explícitas",
+    "iof": "IOF",
+    "settlementLayers": "Camadas de Liquidação",
+    "totalCost": "Custo Total",
+    "iofNote": "IOF depende da estrutura (não fixo)",
+    "iofStandard": "Padrão (3,5%)",
+    "iofOptimized": "Otimizado (variável)",
+    "iofVariable": "Variável por estrutura",
+    "iofToggleLabel": "Comparação de Regime IOF",
+    "iofToggleDescription": "Alterne para comparar cenários de IOF",
+    "costStack": "Pilha de Custos",
+    "coinsIofNote": "IOF depende da estrutura da transação",
+    "coinsIofVariable": "IOF varia conforme a estrutura",
+    "costLegend": {
+      "spread": "Spread",
+      "fees": "Taxas",
+      "iof": "IOF"
+    },
+    "bestForScenario": "Melhor para este cenário"
+  },
+  "providers": {
+    "bank": "Banco",
+    "wise": "Wise",
+    "coins": "Coins"
+  },
+  "diagrams": {
+    "costLayers": {
+      "title": "De Onde Vem o Custo",
+      "subtitle": "Detalhamento de taxas e spreads por provedor",
+      "headerLabel": "Análise de Custos",
+      "legend": {
+        "fxSpread": "Spread FX",
+        "fees": "Taxas",
+        "iof": "IOF"
+      },
+      "header": "Detalhamento de Custo por Provedor (bps)"
+    },
+    "swiftMaze": {
+      "title": "Labirinto SWIFT vs Caminho Direto",
+      "subtitle": "Correspondente bancário tradicional vs liquidação baseada no mercado",
+      "headerLabel": "Fluxo de Liquidação",
+      "traditional": "Rota Tradicional",
+      "direct": "Rota Direta",
+      "correspondentBank": "Banco Correspondente",
+      "localBank": "Banco Local",
+      "sender": "Remetente",
+      "receiver": "Destinatário",
+      "market": "Mercado",
+      "stablecoin": "Rail Stablecoin",
+      "layerCount": "camadas",
+      "nostroVostro": "Nostro/Vostro",
+      "fxMarkup": "Markup FX"
+    },
+    "bidAsk": {
+      "title": "Compra / Venda / Spread",
+      "subtitle": "Entendendo a precificação de mercado",
+      "headerLabel": "Mecânica de Preços",
+      "bidLabel": "Compra",
+      "askLabel": "Venda",
+      "midLabel": "Médio",
+      "spreadLabel": "Spread",
+      "explanation": "O spread é a diferença entre o preço de compra e venda. Menor spread = melhor taxa.",
+      "header": "Visualização de Spread USD/BRL"
+    }
+  },
+  "method": {
+    "title": "Método & Fontes",
+    "subtitle": "Total transparência em nossos cálculos",
+    "calculationSteps": "Etapas de Cálculo",
+    "dataSources": "Fontes de Dados",
+    "steps": {
+      "step1": "Buscar taxa mid-market GBP/USD da API Wise",
+      "step2": "Buscar taxa USD/BRL da referência de mercado local",
+      "step3": "Buscar taxa USDT/BRL do livro de ordens Binance",
+      "step4": "Calcular taxa cruzada GBP/BRL para cada rail de liquidação",
+      "step5": "Aplicar markups de spread específicos do provedor",
+      "step6": "Adicionar taxas explícitas (fixas + percentuais)",
+      "step7": "Aplicar IOF conforme regime selecionado",
+      "step8": "Calcular valores finais de saída para comparação"
+    },
+    "wiseMid": "Wise mid-market (referência FX)",
+    "binanceUsdt": "Binance USDT/BRL (referência cripto)",
+    "coinsOrderBook": "Livro de ordens Coins / execução de mercado",
+    "disclaimer": "Modelo ilustrativo; cotações finais dependem da execução e estrutura."
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "q1": {
+      "question": "Por que o IOF varia?",
+      "answer": "O IOF (Imposto sobre Operações Financeiras) varia conforme a estrutura e finalidade da transação. Diferentes operações têm alíquotas diferentes, de 0,38% a 6,38%."
+    },
+    "q2": {
+      "question": "Como o spread é calculado?",
+      "answer": "O spread é calculado como a diferença entre os preços de compra e venda, expresso em pontos-base (bps). 1 bps = 0,01%."
+    },
+    "q3": {
+      "question": "Posso travar taxas?",
+      "answer": "O travamento de taxas depende do provedor e tamanho da transação. Entre em contato com nossa Trade Desk para contratos futuros e garantias de taxa."
+    },
+    "q4": {
+      "question": "O que é um rail de stablecoin?",
+      "answer": "Um rail de stablecoin usa ativos digitais atrelados a moedas fiduciárias (como USDT ao USD) para liquidação internacional mais rápida e barata."
+    }
+  },
+  "audio": {
+    "title": "Explicação em Áudio",
+    "subtitle": "Explicador de 60-90s",
+    "kidMode": "Explique como se eu tivesse 10 anos",
+    "normalMode": "Explicação padrão"
+  },
+  "footer": {
+    "tradeDesk": "Trade Desk",
+    "legal": "Legal",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço",
+    "disclaimer": "Aviso de Risco",
+    "copyright": "© 2026 Coins.xyz. Todos os direitos reservados."
+  }
+}
